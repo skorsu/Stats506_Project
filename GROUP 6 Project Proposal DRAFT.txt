@@ -5,10 +5,14 @@ Members: Kyle Schulz, Erin Cikanek, Suppapat Korsurat
 The general topic are we have chosen is regression splines. From our initial research, it seems
 that splines can be used as a smoothing technique for a predictor variable. We see potential interest
 in exploring splines to account for a predictor variable that has a non-linear relationship with our 
-response variable that may change over the domain of the predictor variable. 
+response variable that may change over the domain of the predictor variable.
 
-We will be producing a tutorial for this technique in three languages: R, Stata, and Python. Suppapat 
-will be doing R, Erin will be taking over Stata, and Kyle will be using Python. 
+We will focus on piecewise step function, basis functions, and piecewise polynomial, cubic and natural spline. 
 
-Our dataset is not yet chosen - we are taking steps now to explore available datasets and determine
-which will be the best to use an example for this task. 
+We will be producing a tutorial for this technique in three languages: R, Stata, and Python. Suppapat will be doing R, Erin will be taking over Stata, and Kyle will be using Python. 
+
+For R, Suppapat tends to use the functions named bs(), ns()
+For Stata, Erin will apply the function called mkspline.
+For Python, Kyle will use the functions from statsmodels and sklearn.
+
+For the dataset, we will use the Wage dataset from the ISRL library in R. This dataset is from the book name "An Introduction to Statistical Learning with Applications in R". We will use wage as a response variable and we will consider year, education and age as predictors. 
