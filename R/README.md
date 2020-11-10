@@ -1,3 +1,5 @@
+_**Note:** This work is adapted from  `An Introduction to Statistical Learning with Applications in R`, by Gareth James, Daniela Witten, Trevor Hastie and Robert Tibshirani_
+
 ## Exploratory Data Analysis
 This is the histogram for the response variable.  
 <img src="./wage.png" height="50%" width="50%">  
