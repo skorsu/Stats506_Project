@@ -39,9 +39,11 @@ cvar_plot <- function(vari, label){
     theme_bw()
 }
 
-
 ## Response Variable
 nvar_plot(wage, "Wage")
+ggsave("/Users/kevin/506FA20/Stats506_Project/R/wage.png", 
+       nvar_plot(wage, "Wage"))
+
 
 ## Predictor
 nvar_plot(age, "Age")
@@ -54,6 +56,9 @@ cvar_plot(jobclass, "Job")
 cvar_plot(health, "Health Status")
 cvar_plot(health_ins, "Health Insurance")
 
+ggsave("/Users/kevin/506FA20/Stats506_Project/R/region.png", 
+       cvar_plot(region, "Region"))
+
 ##### Comment
 ##### (1) Drop `region` out from teh analysis since the value for this variable
 #####     is the same for the entire dataset.
@@ -65,39 +70,59 @@ data <- data %>% filter(!(wage > 200)) %>% dplyr::select(-logwage, -region)
 
 ##### Currently, I have 2901 observations with 9 variables.
 
-### (1) Want to fit the model between Wage and Age
+### Scatter plot
+wage_age <- function(line = FALSE, formula_wage_age = y ~ x){
+  plot_wage_age <- ggplot(data, aes(x = age, y = wage)) + 
+    geom_point(color = "darkblue") +
+    theme_bw() +
+    labs(title = "Scatter Plot between Wage and Age", x = "Age", y = "Wage")
+  
+  if(line == TRUE){
+    plot_wage_age + 
+      geom_smooth(method = "lm", formula = formula_wage_age, color = "yellow")
+  } else {
+    plot_wage_age
+  }
+}
+
+ggsave("/Users/kevin/506FA20/Stats506_Project/R/wageage.png", 
+       wage_age())
+
+### Want to fit the model between Wage and Age
 summary(lm(wage ~ age, data = data))
+wage_age(TRUE, y ~ x)
 
-### The R-Squared is pretty low (0.04369)
-### Consider the scatterplot between wage and age
-ggplot(data, aes(x = age, y = wage)) + 
-  geom_point(color = "darkblue") +
-  theme_bw() +
-  labs(title = "Scatter Plot between Wage and Age", x = "Age", y = "Wage") +
-  geom_smooth(method = "lm", formula = y ~ x, color = "yellow")
+ggsave("/Users/kevin/506FA20/Stats506_Project/R/wageage1.png", 
+       wage_age(TRUE, y ~ x))
 
-### The scatter plot didn't show the linear trend between these two variables.
 ### Consider using higher degree of polynomial.
-
 summary(lm(wage ~ poly(age, 3), data = data))
-### R-Squared for polynomial regression degree 3 is 0.111
+wage_age(TRUE, y ~ poly(x,3))
 
-ggplot(data, aes(x = age, y = wage)) + 
-  geom_point(color = "darkblue") +
-  theme_bw() +
-  labs(title = "Scatter Plot between Wage and Age", x = "Age", y = "Wage") +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 3), color = "yellow")
+ggsave("/Users/kevin/506FA20/Stats506_Project/R/wageage2.png", 
+       wage_age(TRUE, y ~ poly(x,3)))
 
 
 ### Also, I considered the Step function
 summary(lm(wage ~ cut(age, 6), data = data))
+wage_age(TRUE, y ~ cut(x,6))
 
-ggplot(data, aes(x = age, y = wage)) + 
-  geom_point(color = "darkblue") +
-  theme_bw() +
-  labs(title = "Scatter Plot between Wage and Age", x = "Age", y = "Wage") +
-  geom_smooth(method = "lm", formula = y ~ cut(x, 6), color = "yellow")
+ggsave("/Users/kevin/506FA20/Stats506_Project/R/wageage3.png", 
+       wage_age(TRUE, y ~ cut(x,6)))
 
+### I considered the Basis Spline
+summary(lm(wage ~ bs(age, knots = seq(30,70,10)), data = data))
+wage_age(TRUE, y ~ bs(x,knots = seq(30,70,10)))
+
+ggsave("/Users/kevin/506FA20/Stats506_Project/R/wageage4.png", 
+       wage_age(TRUE, y ~ bs(x,knots = seq(30,70,10))))
+
+### Natural Spline
+summary(lm(wage ~ ns(age, df = 3), data = data))
+wage_age(TRUE, y ~ ns(x, df = 3))
+
+ggsave("/Users/kevin/506FA20/Stats506_Project/R/wageage5.png", 
+       wage_age(TRUE, y ~ ns(x, df = 3)))
 
 
 
