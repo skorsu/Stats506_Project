@@ -1,0 +1,60 @@
+---
+title: "Stats 506, F20, Group Project"
+author: "Group 6: Erin Susan Cikanek, Suppapat Korsurat, Kyle William Schulz"
+date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    theme: paper
+    toc: TRUE
+---
+
+```{r, include = FALSE, echo = FALSE, warning = FALSE}
+library(ggplot2)
+library(tidyverse)
+```
+
+## Introduction
+
+## Data 
+
+## Method
+
+## Core Analysis {.tabset}
+### Python
+```{r, eval = FALSE}
+"Kyle's Code"
+```
+
+```{r, eval = FALSE}
+"When you want to show only code, but prevent this chunck to run."
+```
+
+```{r, echo = FALSE}
+print("When you want this chunck to run, but don't want to show the code.")
+```
+
+### Stata
+```{r, eval = FALSE}
+"Erin's Code"
+```
+
+```{r, eval = FALSE}
+"When you want to show only code, but prevent this chunck to run."
+```
+
+```{r, echo = FALSE}
+print("When you want this chunck to run, but don't want to show the code.")
+```
+
+### R
+The library `splines` is required for implementing splines by using R.
+```{r}
+library(splines)
+```
+
+
+## Summary
+## Discussion
+## Reference
+
+
