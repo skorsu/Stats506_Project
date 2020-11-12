@@ -52,6 +52,47 @@ The library `splines` is required for implementing splines by using R.
 library(splines)
 ```
 
+```{r, include = FALSE}
+data <- read.csv("/Users/kevin/506FA20/Stats506_Project/Dataset/data.csv")
+```
+
+```{r scatter_wage_age, include = FALSE}
+wage_age <- function(line = FALSE, poly = 1, formula_wage_age = y ~ x){
+  plot_title <- "Scatter Plot between Wage and Age"
+  
+  if(poly != 1){
+    plot_title <- paste0(plot_title, ": Polynomial degree ", poly)
+  }
+  
+  plot_wage_age <- ggplot(data, aes(x = age, y = wage)) + 
+    geom_point(color = "darkblue") +
+    theme_bw() +
+    labs(title = plot_title, x = "Age", y = "Wage")
+  
+  if(line == TRUE){
+    plot_wage_age + 
+      geom_smooth(method = "lm", formula = formula_wage_age, color = "yellow")
+  } else {
+    plot_wage_age
+  }
+}
+```
+
+First, considering the linear regression.
+```{r}
+model <- lm(wage ~ age + education + year, data = data)
+summary(model)
+```
+
+The $R^2$ is 0.2619, which is pretty low. Consider the scatter plot between 
+`Wage` and `Age`.
+
+```{r, echo = FALSE, fig.cap = fig_s1}
+wage_age()
+fig_s1 <- paste0("Figure 3.1 Scatter plot between Wage and Age")
+```
+
+
 
 ## Summary
 ## Discussion
