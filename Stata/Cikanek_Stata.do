@@ -180,8 +180,7 @@ predict agespt
 *(option xb assumed; fitted values)
 
 
-*! This looks AWFUL and needs to be changes
-twoway (scatter wage age)(line agespt age) , legend(off)  ///
+twoway (scatter wage age)(line agespt age, sort), legend(off)  ///
            note(knots 35 50 65) title(A Basis Spline)
 
 
