@@ -289,32 +289,144 @@ kdensity r, normal
 
 ![Pnorm Plot](/Users/erincikanek/GitHub/Stats506_Project/Stata/pnorm_reg.jpg)
 ![QNorm Plot](/Users/erincikanek/GitHub/Stats506_Project/Stata/qnorm_reg.jpg)
-
+After looking at these plots we might consider the different relationships that age may have with wage. We can plot the two-way fit between wage and age, our main variables of interest, to compare a basic linear, polynomial, and quadratic fit.   
 
 ```{r, eval = FALSE}
-"When you want to show only code, but prevent this chunck to run."
+twoway (scatter wage age) (lfit wage age) (fpfit wage age) (qfit wage age)
 ```
 
 
 ![Fitted Plot - Linear (red), polynomial (green), and quadratic (yellow) fit](/Users/erincikanek/GitHub/Stats506_Project/Stata/scatter_fit_plots.jpg)
 
-Based on these plots we might be interested in trying to 
+Based on these plots we might be interested in trying to fit a cubic polynomial plot next. 
 
 
-```{r, echo = FALSE}
-print("When you want this chunck to run, but don't want to show the code.")
-```
 
 ##### Cubic Polynomial
 
+To create a cubic polynomial in stata we can use the `##` command with the `age` variable. The regression is written as before with the addition of a cubic fit:
+
+```{r, eval = FALSE}
+reg wage c.age##c.age##c.age year educ
+```
+
+The output in Stat will look like this: 
+
+![Regression with Cubic polynomial for Age](/Users/erincikanek/GitHub/Stats506_Project/Stata/cubic_polynom.png)
+
+
 ##### Piecewise Step Function Regression
 
+For the piecewise step function, the steps and intercepts in Stata must be determined manually. Based on analysis in `R` we determined that including 6 groups with 5 cutpoints is best. The below code shows how to generate six age categories and their intercepts. 
+
+```{r, eval = FALSE}
+* generate 6 age variables, one for each bin * 
+* the age varaible does not have decimels * 
+
+generate age1 = (age - 28.33)
+replace age1 = 0 if (age >= 28.33)
+generate age2 = (age-38.66)
+replace age2 = 0 if age <28.33 | age > 38.66
+generate age3 = (age- 48.99)
+replace age3 = 0 if age <38.66 | age >=48.99
+generate age4 = (age - 59.33)
+replace age4 = 0 if age <48.99 | age >= 59.33 
+generate age5 = (age - 69.66)
+replace age5= 0 if age < 59.33 | age>=69.66
+generate age6 = (age-80)
+replace age6 = 0 if age <69.66
+
+* create intercept variables* 
+
+
+generate int1 = 1
+replace int1 = 0 if age >= 28.33
+generate int2 = 1
+replace int2 = 0 if age <28.33 | age > 38.66
+generate int3 = 1
+replace int3 = 0 if age <38.66 | age >=48.99
+generate int4 = 1
+replace int4 = 0 if age <48.99 | age >= 59.33 
+generate int5 = 1
+replace int5= 0 if age < 59.33 | age>=69.66
+generate int6 = 1
+replace int6 = 0 if age <69.66
+
+```
+
+Using these variables we can then compute a step-wise regression. 
+
+
+```{r, eval = FALSE}
+regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
+	year educ, hascons
+```
+
+
+![Step-wise regression for Age with 6 bins](/Users/erincikanek/GitHub/Stats506_Project/Stata/step_wise.png)
+
+
+
+After running the regression we can then use the predicted yhats to graph the results: 
+
+```{r, eval = FALSE}
+predict yhat
+
+twoway (scatter wage age, sort) ///
+         (line yhat age if age <28.33, sort) ///
+		 (line yhat age if age >=28.33 & age < 38.66, sort) ///
+		 (line yhat age if age >=38.66 & age < 48.99, sort) ///
+		 (line yhat age if age >=48.99 & age<59.33, sort) ///
+		 (line yhat age if age >=59.33 & age<69.66, sort) ///
+		 (line yhat age if age >=69.66, sort), xline(28.33 38.66 48.99 59.33 69.66) // this looks awful
+
+```
+
+
+
+![Step-wise regression for Age with 6 bins](/Users/erincikanek/GitHub/Stats506_Project/Stata/Step_function.jpg)
+
+
 ##### Basis Spline
+For the basis spline, we use the command `bspline`, created by Roger Newson and suggested by [Germán Rodríguez at Princeton] (https://data.princeton.edu/eco572/smoothing2). To create the spline, we call `bspline`, setting the x variable to age and then identifying where we would like the knots in the function. For this example I use 3 knots at 35, 50 and 65, however it should be noted that the min and max of the values need to be included in the knots parentheses. I also use a cubic spline, incidated by `p(3)`. The last step in the line of code is the code that generates the splines for inclusions in the regression. Then the regression can be written as below.    
+
+
+```{r, eval = FALSE}
+bspline, xvar(age) knots(18 35 50 65 80) p(3) gen(_agespt)
+
+
+regress wage _agespt* year educ, noconstant
+
+```
+
+
+The output for the regression in Stata is: 
+
+
+![Basis Spline Regression](/Users/erincikanek/GitHub/Stats506_Project/Stata/spline_reg.png)
+
+
+To look at the fit for age, we can examine the two-way scatter plot between `wage` and `age` using the predicted values of the bivariate regression with splines. 
+```{r, eval = FALSE}
+regress wage _agespt*, noconstant
+predict agespt
+*(option xb assumed; fitted values)
+
+
+twoway (scatter wage age)(line agespt age, sort), legend(off)  ///
+           title(Basis Spline for Age)
+
+```
+
+
+
+![Step-wise regression for Age with 6 bins](/Users/erincikanek/GitHub/Stats506_Project/Stata/basis_spline.jpg)
+
+
 
 
 ##### Natural Spline
-
-
+This further extension is still being coded. Please see the README.md file. 
 
 
 
