@@ -12,6 +12,12 @@ response variable that may change over the domain of the predictor variable.
 We will focus on piecewise step function, basis functions, and piecewise polynomial, cubic and natural spline. 
 
 ## Statistical Software
+In this project, we will use three statistical softwares, Python, Stata and R.
+* Kyle will be using Python.
+* Erin will be taking over Stata
+* Suppapat will be doing R.
 
+## Data
+We use the `Wage` data provided in the library `ISLR` in R. This dataset was created by the author of the book named [`An Introduction to Statistical Learning with Applications in R`](http://faculty.marshall.usc.edu/gareth-james/ISL/).  
 
-Here is the [link](https://raw.githack.com/skorsu/Stats506_Project/main/Group-6.htm) to view the latest version of the project. The source code for this file is `Group 6.Rmd`.
+Here is the [link](https://raw.githack.com/skorsu/Stats506_Project/main/Group-6.html) to view the latest version of the project. The source code for this file is `Group 6.Rmd`.
