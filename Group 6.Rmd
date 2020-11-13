@@ -1,12 +1,14 @@
 ---
-title: "Stats 506, F20, Group Project"
-author: "Group 6: Erin Susan Cikanek, Suppapat Korsurat, Kyle William Schulz"
+title: "Stats 506 (F20) Group Project"
+author: 'Group 6: Erin Susan Cikanek, Suppapat Korsurat, Kyle William Schulz'
 date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
 output:
+  pdf_document:
+    toc: yes
   html_document:
-    theme: paper
     df_print: paged
-    toc: TRUE
+    theme: paper
+    toc: yes
 ---
 
 ```{r, include = FALSE, echo = FALSE, warning = FALSE}
@@ -16,11 +18,22 @@ library(gridExtra)
 library(knitr)
 ```
 
-### Introduction
+## GROUP TO DO LIST 
+1. Match up language within code between group members how-tos 
+2. Summary/Discussion/Reference sections 
+3. Match up plotting style as much as possible 
+4. Organize git repo
+5. Update readme 
+6. Improve readme style/info 
 
-### Data 
+### Introduction
+Linear regression has become widely known as a backbone of modern statistics. Even as more complex, "black box"-style machine learning techniques increase in popularity, many statisticians and researchers still fall back on regression for its interpretability and simpleness. However, linear regression relies on a number on assumptions that may not always be true in practice, such as the constant, monotonic linearity of predictor variables in relation to the response. In this guide, we explore the use of splines to help model predictor variables that may have changing relationships across their domain. These techniques help us to match the predictive power seen in some more advanced machine learning algorithms while keeping the benefits gained by using regression. We show examples in three popular statistical modelling languages - python, R, and STATA. 
+
+### Data
+In this guide, we will be using the "wage" dataset from the R package ISLR. This dataset contains wages from 3,000 Mid-Atlantic workers, along with a select number of other personal demographics. Our goal is to examine the relationship between these demographics and the worker's raw yearly wage. 
 
 ### Method
+We will first calculate a simple linear regression as a baseline. We will then implement four different spline-like techniques on the "age" predictor variable: a step function, polynomial regression, basis spline, and natural spline. At each step, we will check for fit quality, noting any potential improvements along the way. We will conclude with a retrospective and summary of what we learned.   
 
 ### Core Analysis {.tabset}
 #### Python
@@ -56,7 +69,7 @@ library(splines)
 ```
 
 ```{r, include = FALSE}
-data <- read.csv("/Users/kevin/506FA20/Stats506_Project/Dataset/data.csv")
+data <- read.csv("/Users/kwschulz/STATS506/Stats506_Project/Dataset/data.csv")
 ```
 
 ```{r scatter_wage_age, include = FALSE}
