@@ -56,3 +56,7 @@ label values jobtype job
 
 keep id year age wage educ jobtype 
 save "/Users/erincikanek/GitHub/Stats506_Project/Stata/wage.dta"
+
+
+
+// 79: ---------------------------------------------------------------------- *
