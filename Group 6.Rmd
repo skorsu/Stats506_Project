@@ -3,11 +3,11 @@ title: "Stats 506 (F20) Group Project"
 author: 'Group 6: Erin Susan Cikanek, Suppapat Korsurat, Kyle William Schulz'
 date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     df_print: paged
     theme: paper
+    toc: yes
+  pdf_document:
     toc: yes
 ---
 
@@ -38,7 +38,224 @@ We will first calculate a simple linear regression as a baseline. We will then i
 ### Core Analysis {.tabset}
 #### Python
 ```{r, eval = FALSE}
-"Kyle's Code"
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+#Packages required 
+import pandas as pd
+import matplotlib.pyplot as plt
+plt.style.use('fivethirtyeight')
+#%matplotlib inline
+import statsmodels.api as sm
+import numpy as np
+from sklearn.preprocessing import PolynomialFeatures
+from patsy import dmatrix
+
+
+# In[2]:
+
+
+#Let's read in the data file 
+data = pd.read_csv("/Users/kwschulz/STATS506/Stats506_Project/Dataset/data.csv")
+
+
+# In[3]:
+
+
+#Take a quick glance at what the data looks like
+data.head()
+
+
+# In[4]:
+
+
+#Let's check to see if we have any missing values
+data.isna().sum()
+
+
+# In[5]:
+
+
+#Filter to variables for our analysis 
+data = data[["wage", "age", "education", "year"]]
+
+
+# In[6]:
+
+
+#Map education to ordinal scale
+education_map = {"1. < HS Grad":1,"2. HS Grad":2,
+                "3. Some College":3, "4. College Grad":4,
+                "5. Advanced Degree":5}
+data['education'] = data.education.map(education_map)
+
+
+# In[7]:
+
+
+#Lets check the distribution of our predictors
+data[["wage", "age"]].hist(layout=(2,1), figsize=(15,15))
+plt.show()
+plt.savefig('hist.png')
+
+
+# In[8]:
+
+
+#checking year distribution
+data.year.value_counts().reindex([2003, 2004, 2005, 2006, 2007, 2008, 2009]).plot(kind='bar', 
+                                                                                  title='year', 
+                                                                                  ylabel='count', 
+                                                                                  figsize=(7.5,7.5))
+plt.savefig('year_bar.png')
+
+
+# In[9]:
+
+
+#checking education distribution 
+data.education.value_counts().reindex([1, 2, 3, 4, 5]).plot(kind='bar', 
+                                                            title='education', 
+                                                            ylabel='count', 
+                                                            figsize=(7.5,7.5))
+plt.savefig('education_bar.png')
+
+
+# In[10]:
+
+
+#linear regression model
+model = sm.OLS(data["wage"], sm.add_constant(data.drop('wage',axis=1))).fit()
+
+
+# In[11]:
+
+
+#let's check how it did
+model.summary()
+
+
+# In[12]:
+
+
+#let's cut age into 6 bins - stepwise
+data["age_cut"] = pd.cut(data.age, bins=6, labels=False)
+
+
+# In[13]:
+
+
+#now let's model age with bins 
+model2 = sm.OLS(data["wage"], sm.add_constant(data.drop(['wage','age'],axis=1))).fit()
+
+
+# In[14]:
+
+
+#model 2 summary
+model2.summary()
+
+
+# In[15]:
+
+
+#let's check out the scatter plot of age v wage 
+data.plot(x="age", y="wage", kind='scatter', figsize=(7.5,7.5))
+
+
+# In[16]:
+
+
+#2nd degree polynomial 
+p = np.poly1d(np.polyfit(data["age"], data["wage"], 2))
+t = np.linspace(0, 80, 200)
+plt.plot(data["age"], data["wage"], 'o', t, p(t), '-')
+rs = sm.OLS(data["wage"], 
+            np.column_stack([data["age"]**i for i in range(2)]) ).fit().rsquared
+plt.title('r2 = {}'.format(rs))
+plt.show()
+plt.savefig('poly2.png')
+
+
+# In[17]:
+
+
+#3rd degree polynomial 
+p = np.poly1d(np.polyfit(data["age"], data["wage"], 3))
+t = np.linspace(0, 80, 200)
+plt.plot(data["age"], data["wage"], 'o', t, p(t), '-')
+rs = sm.OLS(data["wage"], 
+            np.column_stack([data["age"]**i for i in range(3)]) ).fit().rsquared
+plt.title('r2 = {}'.format(rs))
+plt.show()
+plt.savefig('poly3.png')
+
+
+# In[18]:
+
+
+#4th degree polynomial
+p = np.poly1d(np.polyfit(data["age"], data["wage"], 4))
+t = np.linspace(0, 80, 200)
+plt.plot(data["age"], data["wage"], 'o', t, p(t), '-')
+rs = sm.OLS(data["wage"], 
+            np.column_stack([data["age"]**i for i in range(4)]) ).fit().rsquared
+plt.title('r2 = {}'.format(rs))
+plt.show()
+plt.savefig('poly4.png')
+
+
+# In[19]:
+
+
+#5th degree polynomial
+p = np.poly1d(np.polyfit(data["age"], data["wage"], 5))
+t = np.linspace(0, 80, 200)
+plt.plot(data["age"], data["wage"], 'o', t, p(t), '-')
+rs = sm.OLS(data["wage"], 
+            np.column_stack([data["age"]**i for i in range(5)]) ).fit().rsquared
+plt.title('r2 = {}'.format(rs))
+plt.show()
+plt.savefig('poly5.png')
+
+
+# In[20]:
+
+
+#let's do a third polynomial regression 
+polynomial_features= PolynomialFeatures(degree=3)
+age_p = polynomial_features.fit_transform(data['age'].to_numpy().reshape(-1, 1))
+model3 = sm.OLS(data["wage"], sm.add_constant(np.concatenate([data[['education', 'year']].to_numpy(), age_p], axis=1))).fit() 
+
+
+# In[21]:
+
+
+#check our results
+model3.summary(xname=['education', 'year', 'const', 'poly(age, 3)1', 'poly(age, 3)2', 'poly(age, 3)3'])
+
+
+# In[22]:
+
+
+#implementing a bspline for age 
+age_bs = dmatrix("bs(data.age, df=6)",{"data.age": data.age}, return_type='dataframe')
+model4 = sm.OLS(data["wage"], pd.concat([age_bs, data[['education', 'year']]], axis=1)).fit() 
+model4.summary()
+
+
+# In[23]:
+
+
+#implementing a natural spline for age 
+age_ns = dmatrix("cr(data.age, df=6)",{"data.age": data.age}, return_type='dataframe')
+model5 = sm.OLS(data["wage"], pd.concat([age_ns, data[['education', 'year']]], axis=1)).fit() 
+model5.summary()
+
+
 ```
 
 ```{r, eval = FALSE}
