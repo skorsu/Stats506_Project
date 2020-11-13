@@ -1,3 +1,23 @@
+*-----------------------------------------------------------------------------*
+* Stats 506, Fall 2020 
+* Group Project, Data Cleaning
+* 
+* This script cleans and saves the .dta dataset 
+* for the splines tutorial in Stata
+* 
+*
+* Author: Erin Cikanek ecikanek@umich.edu
+* Updated: November 12, 2020
+*-----------------------------------------------------------------------------*
+// 79: ---------------------------------------------------------------------- *
+
+// set up: ------------------------------------------------------------------ *
+*cd ~/path/to/your/files // comment out before submission 
+*version
+log using psX_template.log, text replace
+
+
+
 * Data Cleaning for Spline Example *
 import delimited "/Users/erincikanek/GitHub/Stats506_Project/Stata/wage_data.csv"
 
