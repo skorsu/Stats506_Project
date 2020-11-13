@@ -5,22 +5,25 @@ date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
 output:
   html_document:
     theme: paper
+    df_print: paged
     toc: TRUE
 ---
 
 ```{r, include = FALSE, echo = FALSE, warning = FALSE}
 library(ggplot2)
 library(tidyverse)
+library(gridExtra)
+library(knitr)
 ```
 
-## Introduction
+### Introduction
 
-## Data 
+### Data 
 
-## Method
+### Method
 
-## Core Analysis {.tabset}
-### Python
+### Core Analysis {.tabset}
+#### Python
 ```{r, eval = FALSE}
 "Kyle's Code"
 ```
@@ -33,7 +36,7 @@ library(tidyverse)
 print("When you want this chunck to run, but don't want to show the code.")
 ```
 
-### Stata
+#### Stata
 ```{r, eval = FALSE}
 "Erin's Code"
 ```
@@ -46,7 +49,7 @@ print("When you want this chunck to run, but don't want to show the code.")
 print("When you want this chunck to run, but don't want to show the code.")
 ```
 
-### R
+#### R
 The library `splines` is required for implementing splines by using R.
 ```{r}
 library(splines)
@@ -61,7 +64,7 @@ wage_age <- function(line = FALSE, poly = 1, formula_wage_age = y ~ x){
   plot_title <- "Scatter Plot between Wage and Age"
   
   if(poly != 1){
-    plot_title <- paste0(plot_title, ": Polynomial degree ", poly)
+    plot_title <- paste0("Polynomial degree ", poly)
   }
   
   plot_wage_age <- ggplot(data, aes(x = age, y = wage)) + 
@@ -92,10 +95,64 @@ wage_age()
 fig_s1 <- paste0("Figure 3.1 Scatter plot between Wage and Age")
 ```
 
+The scatter plot show that the relationship between these two variables are not linear. Hence, we will try various types of spline.
 
+##### Step Function
+Consider applying the step function on `Age`. 
+```{r}
+model_cut <- lm(wage ~ cut(age, 4) + education + year, data = data)
+summary(model_cut)
+```
 
-## Summary
-## Discussion
-## Reference
+The $R^2$ is 0.2828, which improved from the previous model. The plot below 
+is a scatterplot between `Wage` and `Age`, also the yellow line represents 
+the step function.
+
+```{r, echo = FALSE, fig.cap = fig_s2}
+wage_age(TRUE, 1, y ~ cut(x,4))
+fig_s2 <- paste0("Figure 3.2 Scatter plot between Wage and Age with the
+                 step function.")
+```
+
+##### Polynomial Regression
+Consider the various number for the degree in the polynomial regression. The plots below are the result from the fitting polynomial regression.
+```{r, echo = FALSE, warning = FALSE}
+degree_poly <- c(2,3,5,20)
+
+for(i in 1:length(degree_poly)){
+  poly_d <- degree_poly[i]
+  print(wage_age(TRUE, poly_d, y ~ poly(x, poly_d)))
+}
+
+```
+
+```{r, echo = FALSE}
+poly_r2 <- c()
+
+for(i in 2:20){
+  r2_p <-summary(lm(wage ~ poly(age, i) + education + year, 
+                   data = data))$r.squared
+  poly_r2 <- c(poly_r2, r2_p)
+}
+
+poly_r2 <- data.frame(degree = 2:20, R2 = poly_r2)
+colnames(poly_r2) <- c("Degree of the age polynomial", "R-Squared")
+poly_r2
+```
+
+Even the higher degree give the higher $R^2$, the `overfitting` problem may be occured. Hence, polynomial regression with degree 3 would be appropriate.
+
+```{r}
+model_poly <- lm(wage ~ poly(age, 3) + education + year, data = data)
+summary(model_poly)
+```
+
+The $R^2$ is 0.2909, which improved from all previous models.
+
+##### Basis Spline and Natural Spline
+
+### Summary
+### Discussion
+### Reference
 
 
