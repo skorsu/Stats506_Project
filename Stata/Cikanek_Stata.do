@@ -12,7 +12,8 @@
 
 * To - Do List * 
 *! 1. Complete descriptions of code in .Rmd
-*! 1. Export Results for cubic polynomial
+*! 1. Make stata code in the Rmd neater, if possible.
+*! 1. Need a better visual for the polynomial regression
 *! 1. Complete code for piecewise step function
 *! 		a. Determine best way to visualise results for piecewise 
 *!		b. Current visualization for piecewise looks awful - 
@@ -32,11 +33,11 @@ log using cikanek_group_proj.log, text replace
 * open data* 
 use "wage.dta", clear
 
-
-
 describe 
 
-* linear regression example
+*****************************
+* linear regression example * ----------------------------------------------- *
+*****************************
 
 reg wage age year edu
 return list
@@ -84,13 +85,10 @@ twoway (scatter wage age) (lfit wage age) (fpfit wage age) (qfit wage age)
 ******************
 *cubic polynomial*
 ******************
-
-
+drop r
 
 reg wage c.age##c.age##c.age year educ
 
-predict r, resid
-rvfplot,  //line at 0 to better shows middle of iid 
 
 
 
@@ -138,7 +136,7 @@ replace int6 = 0 if age <69.66
 
 
 
-* stepwise regression * 
+* stepwise regression * ----------------------------------------------------- * 
 
 regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
 	year educ, hascons
@@ -156,30 +154,33 @@ twoway (scatter wage age, sort) ///
 		 (line yhat age if age >=69.66, sort), xline(28.33 38.66 48.99 59.33 69.66) // this looks awful
 
 
-
-*basis spline* 
+**************
+*basis spline* -------------------------------------------------------------- *
+**************
+ 
 * currently use command bspline
 * https://data.princeton.edu/eco572/smoothing2
 *create the spline p(3) = cubic spline and gen is the new var
 bspline, xvar(age) knots(18 35 50 65 80) p(3) gen(_agespt)
 
 
-quietly regress wage _agespt*, noconstant
+regress wage _agespt* year educ, noconstant
 
+
+regress wage _agespt*, noconstant
 predict agespt
 *(option xb assumed; fitted values)
 
 
 twoway (scatter wage age)(line agespt age, sort), legend(off)  ///
-           note(knots 35 50 65) title(A Basis Spline)
+           title(Basis Spline for Age)
+
+
+
+* natural spline * ---------------------------------------------------------- *
 
 
 
 
 
-
-
-
-
-
-* natural spline
+// 79: ---------------------------------------------------------------------- *
