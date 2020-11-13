@@ -25,7 +25,7 @@ The dataset can be downloaded R software by using `library(ISLR)`and `Wage` comm
 ## Report
 Here is the [link](https://raw.githack.com/skorsu/Stats506_Project/main/Group-6.html) to view the latest version of the project. The source code for this file is `Group 6.Rmd`.  
 
-## To-Do List
+## Group: To-Do List
 Since this project is an on-going project, there are some minor issue that we are still working on it. Here is the to-do list.
 
 * Match up language within code between group members how-tos
@@ -34,3 +34,10 @@ Since this project is an on-going project, there are some minor issue that we ar
 * Organize git repo
 * Update readme
 * Improve readme style/info
+
+## Personal: To-Do List
+* Python
+* R
+	* Edit the plots, consider which one should include into the final report.
+	* The `education` variable: make it to be consistent with the others.
+* Stata
