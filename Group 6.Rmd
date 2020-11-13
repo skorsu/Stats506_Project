@@ -1,13 +1,13 @@
 ---
 title: "Stats 506 (F20) Group Project"
-author: 'Group 6: Erin Susan Cikanek, Suppapat Korsurat, Kyle William Schulz'
+author: 'Group 6: Erin Cikanek, Suppapat Korsurat, Kyle William Schulz'
 date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     df_print: paged
     theme: paper
+    toc: yes
+  pdf_document:
     toc: yes
 ---
 
@@ -16,6 +16,7 @@ library(ggplot2)
 library(tidyverse)
 library(gridExtra)
 library(knitr)
+library(foreign)
 ```
 
 ## GROUP TO DO LIST 
@@ -30,7 +31,7 @@ library(knitr)
 Linear regression has become widely known as a backbone of modern statistics. Even as more complex, "black box"-style machine learning techniques increase in popularity, many statisticians and researchers still fall back on regression for its interpretability and simpleness. However, linear regression relies on a number on assumptions that may not always be true in practice, such as the constant, monotonic linearity of predictor variables in relation to the response. In this guide, we explore the use of splines to help model predictor variables that may have changing relationships across their domain. These techniques help us to match the predictive power seen in some more advanced machine learning algorithms while keeping the benefits gained by using regression. We show examples in three popular statistical modelling languages - python, R, and STATA. 
 
 ### Data
-In this guide, we will be using the "wage" dataset from the R package ISLR. This dataset contains wages from 3,000 Mid-Atlantic workers, along with a select number of other personal demographics. Our goal is to examine the relationship between these demographics and the worker's raw yearly wage. 
+In this guide, we will be using the "wage" dataset from the R package ISLR. This data is also used in the book *[insert book name]* This dataset contains wages from 3,000 Mid-Atlantic, male workers, between the years 2003-2009, along with a select number of other personal demographics. We retain the variables for `wage`, `age`, `year`, and `education` for our analysis. Our goal is to examine the relationship between age, year, and education and workers' yearly wage. 
 
 ### Method
 We will first calculate a simple linear regression as a baseline. We will then implement four different spline-like techniques on the "age" predictor variable: a step function, polynomial regression, basis spline, and natural spline. At each step, we will check for fit quality, noting any potential improvements along the way. We will conclude with a retrospective and summary of what we learned.   
@@ -50,17 +51,57 @@ print("When you want this chunck to run, but don't want to show the code.")
 ```
 
 #### Stata
+Before starting analysis using splines, first look at OLS regression with wage as it relates to age, year, and education. We can run the simple code below to look at this relationship.
 ```{r, eval = FALSE}
-"Erin's Code"
+reg wage age year edu
 ```
+
+Stata will return the following output:
+
+![OLS output for wage ~ age + year + education](/Users/erincikanek/GitHub/Stats506_Project/Stata/stata_reg_output.png)
+
+
+
+To see if a non-linear relationship might be present, kernal density, pnorm, and qnorm plots can assit with this: 
+```{r, eval = FALSE}
+predict r, resid
+kdensity r, normal
+```
+
+![Kernal Density Plot](/Users/erincikanek/GitHub/Stats506_Project/Stata/kernel_dens_reg.jpg)
+
+![Pnorm Plot](/Users/erincikanek/GitHub/Stats506_Project/Stata/pnorm_reg.jpg)
+![QNorm Plot](/Users/erincikanek/GitHub/Stats506_Project/Stata/qnorm_reg.jpg)
+
 
 ```{r, eval = FALSE}
 "When you want to show only code, but prevent this chunck to run."
 ```
 
+
+![Fitted Plot - Linear (red), polynomial (green), and quadratic (yellow) fit](/Users/erincikanek/GitHub/Stats506_Project/Stata/scatter_fit_plots.jpg)
+
+Based on these plots we might be interested in trying to 
+
+
 ```{r, echo = FALSE}
 print("When you want this chunck to run, but don't want to show the code.")
 ```
+
+##### Cubic Polynomial
+
+##### Piecewise Step Function Regression
+
+##### Basis Spline
+
+
+##### Natural Spline
+
+
+
+
+
+
 
 #### R
 The library `splines` is required for implementing splines by using R.
@@ -69,7 +110,7 @@ library(splines)
 ```
 
 ```{r, include = FALSE}
-data <- read.csv("/Users/kwschulz/STATS506/Stats506_Project/Dataset/data.csv")
+data <- read.csv("~/GitHub/Stats506_Project/Dataset/data.csv")
 ```
 
 ```{r scatter_wage_age, include = FALSE}
