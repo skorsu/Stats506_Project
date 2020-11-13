@@ -10,15 +10,30 @@
 *-----------------------------------------------------------------------------*
 // 79: ---------------------------------------------------------------------- *
 
+* To - Do List * 
+*! 1. Complete descriptions of code in .Rmd
+*! 1. Export Results for cubic polynomial
+*! 1. Complete code for piecewise step function
+*! 		a. Determine best way to visualise results for piecewise 
+*!		b. Current visualization for piecewise looks awful - 
+*!			something may be wrong
+*! 1. Complete code for basis splines
+*! 		a. Determine best way to visualise results for basis spline
+*! 1. Complete code for natural splines
+*! 		a. Determine best way to visualise results for natural spline
+
 // set up: ------------------------------------------------------------------ *
-*cd ~/path/to/your/files // comment out before submission 
+* for recoding/naming of variables see 'Data_cleaning.do' file 
+
+
+*cd ~//Users/erincikanek/GitHub/Stats506_Project/Stata // comment out before submission 
 *version
 log using cikanek_group_proj.log, text replace
 
 * open data* 
-use "/Users/erincikanek/GitHub/Stats506_Project/Stata/wage.dta", clear
+use "wage.dta", clear
 
-* for recoding/naming of variables see 'Data_cleaning' file 
+
 
 describe 
 
@@ -94,24 +109,84 @@ rvfplot,  //line at 0 to better shows middle of iid
 *piecewise step function*
 ************************* 
 
+* try to cut into six bins either by n or by parts of age so 1/6 of age
+* 80-18 = 62 / 6 not decimels for age so 5 cuts, 6 bins 
+hist age, bin(6)
 
 
-* suggests a cut point for age - what is ours? *
+* generate 6 age variables, one for each bin * 
+* the age varaible does not have decimels * 
 
-* create age variables* 
+generate age1 = (age - 28.33)
+replace age1 = 0 if (age >= 28.33)
+generate age2 = (age-38.66)
+replace age2 = 0 if age <28.33 | age > 38.66
+generate age3 = (age- 48.99)
+replace age3 = 0 if age <38.66 | age >=48.99
+generate age4 = (age - 59.33)
+replace age4 = 0 if age <48.99 | age >= 59.33 
+generate age5 = (age - 69.66)
+replace age5= 0 if age < 59.33 | age>=69.66
+generate age6 = (age-80)
+replace age6 = 0 if age <69.66
 
 * create intercept variables* 
 
 
-reg wage age year edu
-return list
+generate int1 = 1
+replace int1 = 0 if age >= 28.33
+generate int2 = 1
+replace int2 = 0 if age <28.33 | age > 38.66
+generate int3 = 1
+replace int3 = 0 if age <38.66 | age >=48.99
+generate int4 = 1
+replace int4 = 0 if age <48.99 | age >= 59.33 
+generate int5 = 1
+replace int5= 0 if age < 59.33 | age>=69.66
+generate int6 = 1
+replace int6 = 0 if age <69.66
+
+
+
+* stepwise regression * 
+
+regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
+	year educ, hascons
+
+
+*use yhat predictions to graph results * 
+predict yhat
+
+twoway (scatter wage age) ///
+         (line yhat age if age <28.33, sort) ///
+		 (line yhat age if age >=28.33 & age < 38.66, sort) ///
+		 (line yhat age if age >=38.66 & age < 48.99, sort) ///
+		 (line yhat age if age >=48.99 & age<59.33, sort) ///
+		 (line yhat age if age >=59.33 & age<69.66, sort) ///
+		 (line yhat age if age >=69.66, sort), xline(28.33 38.66 48.99 59.33 69.66) // this looks awful
+
+
+
+*basis spline* 
+* currently use command bspline
+* https://data.princeton.edu/eco572/smoothing2
+*create the spline p(3) = cubic spline and gen is the new var
+bspline, xvar(age) knots(18 35 50 65 80) p(3) gen(_agespt)
+
+
+quietly regress wage _agespt*, noconstant
+
+predict agespt
+*(option xb assumed; fitted values)
+
+
+*! This looks AWFUL and needs to be changes
+twoway (scatter wage age)(line agespt age) , legend(off)  ///
+           note(knots 35 50 65) title(A Basis Spline)
 
 
 
 
-
-
-*basis spline
 
 
 
