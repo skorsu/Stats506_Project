@@ -17,8 +17,7 @@
 *! 		a. Determine best way to visualise results for piecewise 
 *!		b. Current visualization for piecewise looks awful - 
 *!			something may be wrong
-*! 1. Complete code for basis splines
-*! 		a. Determine best way to visualise results for basis spline
+*! 1. Determine best way to visualise results for basis spline
 *! 1. Complete code for natural splines
 *! 		a. Determine best way to visualise results for natural spline
 
@@ -78,22 +77,13 @@ rvfplot, yline(0) //line at 0 to better shows middle of iid
 twoway (scatter wage age) (lfit wage age) //example shows lowess but is there a way to use splines?
 
 
-* plot residuals against variables* 
-drop r 
-reg wage age
-predict r, resid
-scatter r age, yline(0) // plots the residuals against the age variable 
-
+*add polynomial fit and quadratic fit to scatter plot* 
+twoway (scatter wage age) (lfit wage age) (fpfit wage age) (qfit wage age)
 
 
 ******************
 *cubic polynomial*
 ******************
-
-twoway (scatter wage age) (lfit wage age)
-
-*add polynomial fit and quadratic fit to scatter plot* 
-twoway (scatter wage age) (lfit wage age) (fpfit wage age) (qfit wage age)
 
 
 
@@ -157,7 +147,7 @@ regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
 *use yhat predictions to graph results * 
 predict yhat
 
-twoway (scatter wage age) ///
+twoway (scatter wage age, sort) ///
          (line yhat age if age <28.33, sort) ///
 		 (line yhat age if age >=28.33 & age < 38.66, sort) ///
 		 (line yhat age if age >=38.66 & age < 48.99, sort) ///
