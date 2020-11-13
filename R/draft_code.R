@@ -23,6 +23,8 @@ for(i in 1:dim(data)[2]){
   }
 }
 
+table(cut(data$age,6))
+
 ## Plot for EDA
 ### Numerical Variables
 nvar_plot <- function(vari, label){
@@ -81,14 +83,10 @@ wage_age <- function(line = FALSE, poly = 1, formula_wage_age = y ~ x){
 
 ## Fit the linear regression
 summary(lm(wage ~ age + education + year, data = data))
-## The R-Squared is 0.2619, which is pretty low.
 
 ## Consider the Step function, applying on the age variable.
 ## This is the data from yesr 2003 to 2009, 6 cuts should be enough
-summary(lm(wage ~ age + education + cut(data$year, 6), data = data))
-
-## The R-Squared is 0.2626, which improved a little. Consider the scatter plot
-## between the age and wage.
+summary(lm(wage ~ cut(age, 6) + education + year, data = data))
 
 wage_age(TRUE)
 
@@ -116,6 +114,7 @@ data.frame(degree = 2:5, R2 = poly_r2)
 
 set.seed(1)
 data$CV <- sample(rep(1:5, 600))
+
 basis_MSE <- c()
 
 ## For loop for the number of knots
@@ -137,7 +136,7 @@ for(knots in 1:10){
   basis_MSE <- c(basis_MSE, mean(MSE))
 }
 
-dumm <- data.frame(x = as.factor(4 + 1:10), y = basis_MSE)
+dumm <- data.frame(x = as.factor(1:10), y = basis_MSE)
 ggplot(dumm, aes(x = x, y = y, group = 1)) +
   geom_line() +
   geom_point() +
@@ -182,7 +181,6 @@ ggplot(dumm, aes(x = x, y = y, group = 1)) +
        x = "Degree of Freedom", y = "MSE") +
   theme_bw()
 
-## When df = 6, the MSE is the lowest.
 summary(lm(wage ~ ns(age, df = 6) + education + year, data = data))
 wage_age(TRUE, formula_wage_age = y ~ bs(x,knots = 2))
-## R-squared = 0.2927
+
