@@ -45,3 +45,11 @@ Since this project is an on-going project, there are some minor issue that we ar
 	* Edit the plots, consider which one should include into the final report.
 	* The `education` variable: make it to be consistent with the others.
 * Stata
+    * . Complete descriptions of code in .Rmd
+    * Make stata code in the Rmd neater, if possible.
+    *  Need a better visual for the polynomial regression
+   *       a. Determine best way to visualise results for piecewise 
+   *          b. Current visualization for piecewise looks awful - something may be wrong
+    * Determine best way to visualise results for basis spline
+    * Complete code for natural splines
+  *        a. Determine best way to visualise results for natural spline
