@@ -29,7 +29,8 @@ Here is the [link](https://raw.githack.com/skorsu/Stats506_Project/main/Group-6.
 Since this project is an on-going project, there are some minor issue that we are still working on it. Here is the to-do list.
 
 * Match up language within code between group members how-tos
-* Summary/Discussion/Reference sections
+* Change data read-in to be transferrable across members 
+* Summary/Discussion/Reference sections once results are fully known
 * Match up plotting style as much as possible
 * Organize git repo
 * Update readme
@@ -37,6 +38,9 @@ Since this project is an on-going project, there are some minor issue that we ar
 
 ## Personal: To-Do List
 * Python
+	* Need to add plots that show the splines relationships like seen in quadratic 
+	* Need to move the image files of output into the rmd output
+	* Need to add text walking user through python steps 
 * R
 	* Edit the plots, consider which one should include into the final report.
 	* The `education` variable: make it to be consistent with the others.
