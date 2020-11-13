@@ -14,4 +14,4 @@ We will focus on piecewise step function, basis functions, and piecewise polynom
 ## Statistical Software
 
 
-[Latest Version](https://raw.githack.com/skorsu/Stats506_Project/main/Group-6.html)
+Here is the [link](https://raw.githack.com/skorsu/Stats506_Project/main/Group-6.htm) to view the latest version of the project. The source code for this file is `Group 6.Rmd`.
