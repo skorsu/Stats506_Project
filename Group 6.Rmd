@@ -150,6 +150,99 @@ summary(model_poly)
 The $R^2$ is 0.2909, which improved from all previous models.
 
 ##### Basis Spline and Natural Spline
+For both `Basis Spline` and `Natural Spline`, the number of knots or the degree of freedom need to be specified. One of the method used for specified is performing `K-fold Cross Validation`. In this case, K is equal to 5. For both types of spline, the highest degree of polynomial for age is 3.
+
+  - Basis Spline: df = 4 + knots
+  - Natural Spline: df = 2 + knots
+
+```{r k_fold_cv, include = FALSE}
+set.seed(1)
+data$CV <- sample(rep(1:5, 600))
+```
+
+```{r k_fold_plot, include = FALSE}
+## Function for calculate and plot
+plot_kfold <- function(knots = 1:10, bs = TRUE){
+  store_MSE <- c()
+  title_plot <- "5-fold cross-validate MSE"
+  
+  if(bs == TRUE){
+    title_plot <- paste0(title_plot, ": Basis Spline")
+  } else  {
+    title_plot <- paste0(title_plot, ": Natural Spline")
+  }
+  
+  for(i in knots){
+    
+    MSE <- c()
+    
+    for(j in 1:5){
+      
+      ## Split the data
+      train_data <- data %>% filter(CV != j)
+      validate_data <- data %>% filter(CV == j)
+      
+      ## Train the model
+      if(bs == TRUE){
+        model <- lm(wage ~ bs(age, df = 4 + i) + education + year, 
+                    data = train_data)
+      } else {
+        model <- lm(wage ~ ns(age, df = 2 + i) + education + year, 
+                    data = train_data)
+      }
+      
+      ## Store the MSE for each validation set
+      MSE <- c(MSE, 
+               mean((predict(model, validate_data) - validate_data$wage)^2))
+      
+    }
+    
+    ## Store the MSE for each knots
+    store_MSE <- c(store_MSE, mean(MSE))
+  }
+  
+  ## Create a plot
+  dummy_result <- data.frame(knots = as.factor(knots), store_MSE)
+  p <- ggplot(dummy_result, aes(x = knots, y = store_MSE, group = 1)) +
+    geom_line() +
+    geom_point() +
+    labs(title = title_plot, x = "Number of knot", y = "MSE") +
+    geom_text(aes(label = round(store_MSE,2)), vjust = -1) +
+    ylim(min(store_MSE) - 3, max(store_MSE) + 3) +
+    theme_bw()
+  print(p)
+}
+```
+
+Consider the MSE for basis spline.
+
+```{r, echo = FALSE}
+plot_kfold()
+```
+
+The MSE is lowest when the number of `knot` is equal to 2. Fit the regression with basis spline.
+
+```{r}
+model_basis <- lm(wage ~ bs(age, df = 6) + education + year, data = data)
+summary(model_basis)
+```
+
+The $R^2$ is 0.2923.
+
+Then consider the Natural Spline.
+
+```{r, echo = FALSE}
+plot_kfold(bs = FALSE)
+```
+
+The MSE is lowest when the number of `knot` is equal to 4. Fit the regression with natural spline.
+
+```{r}
+model_natural <- lm(wage ~ ns(age, df = 6) + education + year, data = data)
+summary(model_natural)
+```
+
+The $R^2$ is 0.2927.
 
 ### Summary
 ### Discussion
