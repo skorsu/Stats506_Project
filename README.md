@@ -18,7 +18,9 @@ In this project, we will use three statistical softwares, Python, Stata and R.
 * Suppapat will be doing R.
 
 ## Data
-We use the `Wage` data provided in the library `ISLR` in R. This dataset was created by the author of the book named [`An Introduction to Statistical Learning with Applications in R`](http://faculty.marshall.usc.edu/gareth-james/ISL/).  
+We use the `Wage` data provided in the library `ISLR` in R. This dataset was created by the author of the book named [`An Introduction to Statistical Learning with Applications in R`](http://faculty.marshall.usc.edu/gareth-james/ISL/). 
+
+The dataset can be downloaded R software by using `library(ISLR)`and `Wage` command respectively or download directly from this site. You can found this dataset under the `Dataset` folder.
 
 ## Report
 Here is the [link](https://raw.githack.com/skorsu/Stats506_Project/main/Group-6.html) to view the latest version of the project. The source code for this file is `Group 6.Rmd`.  
