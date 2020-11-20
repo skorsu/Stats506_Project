@@ -62,5 +62,26 @@ summary(model_cut)
 wage_age(TRUE, 1, y ~ cut(x,4)) +
   geom_vline(xintercept = c(33.5, 49, 64.5), color = "red")
 
+## Prepared the data for performing 5-fold cross validation.
+set.seed(1)
+data$CV <- sample(rep(1:5, 600))
+
+## Basis Spline
+plot_kfold()
+model_basis <- lm(wage ~ bs(age, df = 6) + edu + year, data = data)
+summary(model_basis)
+wage_age(TRUE, 1, y ~ bs(x,df = 6))
+
+## Natural Spline
+plot_kfold(bs = FALSE)
+model_natural <- lm(wage ~ ns(age, df = 6) + education + year, data = data)
+summary(model_natural)
+wage_age(TRUE, 1, y ~ ns(x, df = 6))
+
+
+
+
+
+
 
 
