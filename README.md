@@ -43,9 +43,9 @@ Since this project is an on-going project, there are some minor issue that we ar
 	* Need to add text walking user through python steps 
 * R
 	* Edit the plots, consider which one should include into the final report.
-	* The `education` variable: make it to be consistent with the others.
+	* ~~The `education` variable: make it to be consistent with the others.~~
 * Stata
-    * . Complete descriptions of code in .Rmd
+    * Complete descriptions of code in .Rmd
     * Make stata code in the Rmd neater, if possible.
     *  Need a better visual for the polynomial regression
         *    a. Determine best way to visualise results for piecewise 
@@ -53,3 +53,9 @@ Since this project is an on-going project, there are some minor issue that we ar
     * Determine best way to visualise results for basis spline
     * Complete code for natural splines
         *    a. Determine best way to visualise results for natural spline
+     
+## Comment from Peer-Review Activity
+* It would be more helpful to add some more explanation functions and maybe things to consider when using these packages and functions.  
+* How can you identify overfitting when using splines?  
+* It might be helpful to add more explanation to the principal of step function/natural spline/cubic .  
+* Some lines of code exceed 80 characters.  
