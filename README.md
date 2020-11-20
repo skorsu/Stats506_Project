@@ -43,9 +43,9 @@ Since this project is an on-going project, there are some minor issue that we ar
 	* Need to add text walking user through python steps 
 * R
 	* Edit the plots, consider which one should include into the final report.
-	* The `education` variable: make it to be consistent with the others.
+	* ~~The `education` variable: make it to be consistent with the others.~~
 * Stata
-    * . Complete descriptions of code in .Rmd
+    * Complete descriptions of code in .Rmd
     * Make stata code in the Rmd neater, if possible.
     *  Need a better visual for the polynomial regression
         *    a. Determine best way to visualise results for piecewise 
