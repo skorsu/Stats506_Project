@@ -53,3 +53,9 @@ Since this project is an on-going project, there are some minor issue that we ar
     * Determine best way to visualise results for basis spline
     * Complete code for natural splines
         *    a. Determine best way to visualise results for natural spline
+     
+## Comment from Peer-Review Activity
+* It would be more helpful to add some more explanation functions and maybe things to consider when using these packages and functions.  
+* How can you identify overfitting when using splines?  
+* It might be helpful to add more explanation to the principal of step function/natural spline/cubic .  
+* Some lines of code exceed 80 characters.  
