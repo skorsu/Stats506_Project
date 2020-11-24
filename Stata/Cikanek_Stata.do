@@ -178,8 +178,26 @@ twoway (scatter wage age)(line agespt age, sort), legend(off)  ///
 
 
 * natural spline * ---------------------------------------------------------- *
+*However, a restricted cubic spline may be a better choice than a linear spline when working with a very curved function. When using a restricted cubic spline, one obtains a continuous smooth function that is linear before the first knot, a piecewise cubic polynomial between adjacent knots, and linear again after the last knot
 
 
+* use command mkspline to create a cubic/natural spline 
+
+mkspline age_nsp=age, cubic/natural knots(35 50 65)
+
+
+regress wage age_nsp educ year
+
+
+* can also just specify the number of knots 
+mkspline age_nsp2=age, cubic/natural nknots(3) 
+
+regress wage age_nsp2 educ year
+
+
+*In the third syntax, mkspline creates variables containing a restricted cubic spline of oldvar.
+* This is also known as a natural spline. The location and spacing of the knots is determined by the
+* specification of the nknots() and knots() options.
 
 
 
