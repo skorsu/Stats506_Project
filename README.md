@@ -58,4 +58,32 @@ Since this project is an on-going project, there are some minor issue that we ar
 * It would be more helpful to add some more explanation functions and maybe things to consider when using these packages and functions.  
 * How can you identify overfitting when using splines?  
 * It might be helpful to add more explanation to the principal of step function/natural spline/cubic .  
-* Some lines of code exceed 80 characters.  
+* Some lines of code exceed 80 characters. 
+
+## Comment from Peer-Review Activity (kyle)
+* Great formatting and structure for your first draft. 
+* Introduction section looks good. Concepts are clearly stated. 
+* For data section, it would be a good idea to provide some basic statistics and visualization about the data. Also the last sentence is kind of vague. Maybe directly state which variables are dependent variables and which is the response variable. 
+* For the method section, maybe you can provide more elaborated description about the different spline-like techniques you mentioned. 
+* For the python part in the core analysis part, you may want to be consistent with the style in other parts. It would be better to write your steps and explanations in .rmd text instead of including it in code chunk. Also, this would help you clearly presenting the plots.
+
+## Comment from Peer-Review Activity (kyle) 
+* The code works and does what it is supposed to do as is described in the written part.
+* The code generally follows the style guideline, except that it is better to include header and comment
+parts in each chuck of the code.
+* The code is cleared structured with different level of titles
+* The code is efficient.
+* It is better to include introduction of key packages/commands prior to using them.
+* The parallel structure between examples can be easily identified.
+* The examples are accurate.
+* The main content of the tutorial is described in the “Proposal” part. It would be better to organize using
+introduction and outline parts.
+* The source of the data used in examples is clear and adequately described.
+* The writing style is clear and concise.
+* There is README describing the project and the relation between files. Source files are also
+documented.
+* All source files are present and organized in a helpful way.
+* There is evidence of multiple commits per member. There is an open issue that is not answered yet.
+* The tutorial as a whole is easy to follow and navigate.
+* The tutorial have a professional appearance.
+* It would be better to include header and comment parts to help reader understand the code.
