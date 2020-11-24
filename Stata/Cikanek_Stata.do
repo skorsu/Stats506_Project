@@ -19,8 +19,7 @@
 *!		b. Current visualization for piecewise looks awful - 
 *!			something may be wrong
 *! 1. Determine best way to visualise results for basis spline
-*! 1. Complete code for natural splines
-*! 		a. Determine best way to visualise results for natural spline
+*! 1. Determine best way to visualise results for natural spline
 
 // set up: ------------------------------------------------------------------ *
 * for recoding/naming of variables see 'Data_cleaning.do' file 
@@ -188,13 +187,14 @@ mkspline age_nc=age, cubic knots(18 35 50 65 80)
 regress wage age_nc* educ year
 
 
-twoway (scatter wage age)(line age_nc age, sort), legend(off)  ///
+* This also looks bad - need to figure out * 
+twoway (scatter wage age)(line age_nc* age, sort), legend(off)  ///
            title(Natural Spline for Age)
 
 
 
-* can also just specify the number of knots 
-mkspline age_nspk=age, cubic nknots(3) 
+* can also just specify the number of knots rather than the cut points *
+mkspline age_nspk=age, cubic nknots(5) 
 
 regress wage age_nspk* educ year
 
