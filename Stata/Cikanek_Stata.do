@@ -145,7 +145,7 @@ regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
 *use yhat predictions to graph results * 
 predict yhat
 
-twoway (scatter wage age, sort) ///
+twoway (scatter wage age) ///
          (line yhat age if age <28.33, sort) ///
 		 (line yhat age if age >=28.33 & age < 38.66, sort) ///
 		 (line yhat age if age >=38.66 & age < 48.99, sort) ///
@@ -183,16 +183,20 @@ twoway (scatter wage age)(line agespt age, sort), legend(off)  ///
 
 * use command mkspline to create a cubic/natural spline 
 
-mkspline age_nsp=age, cubic/natural knots(35 50 65)
+mkspline age_nc=age, cubic knots(18 35 50 65 80)
+
+regress wage age_nc* educ year
 
 
-regress wage age_nsp educ year
+twoway (scatter wage age)(line age_nc age, sort), legend(off)  ///
+           title(Natural Spline for Age)
+
 
 
 * can also just specify the number of knots 
-mkspline age_nsp2=age, cubic/natural nknots(3) 
+mkspline age_nspk=age, cubic nknots(3) 
 
-regress wage age_nsp2 educ year
+regress wage age_nspk* educ year
 
 
 *In the third syntax, mkspline creates variables containing a restricted cubic spline of oldvar.
