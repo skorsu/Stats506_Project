@@ -19,6 +19,7 @@ library(gridExtra)
 library(knitr)
 library(foreign)
 library(png)
+library(linguisticsdown) ## Import Picture form GitHub site.
 ```
 
 ```{r, include = FALSE}
@@ -26,6 +27,7 @@ library(png)
 ## Erin: "/Users/erincikanek/GitHub/"
 ## Kevin: "/Users/kevin/506FA20/"
 path <- "/Users/kevin/506FA20/"
+main_url <- "https://raw.githubusercontent.com/skorsu/Stats506_Project/main/"
 ```
 
 
@@ -74,20 +76,81 @@ Table 0.1: Table explain the type, role, along with the explanation for
 each variable.
 
 ### Plots
-
 ```{r, echo = FALSE, fig.cap = cap_02}
-include_graphics(paste0(path, "Stats506_Project/R/EDA.png"))
-cap_02 <- "Figure 0.2: Histogram or Bar chart for variables 
-used in the analysis"
+include_graphics2(paste0(main_url, "R/result_pic/EDA.png"))
+cap_02 <- "Figure 0.2: Histogram or Bar chart for variables used in the 
+analysis"
 ```
 
 ## Method
 We will first calculate a simple linear regression as a baseline. We will then 
-implement four different spline-like techniques on the "age" predictor variable
-: a step function, polynomial regression, basis spline, and natural spline. At 
-each step, we will check for fit quality, noting any potential improvements 
+implement four different spline-like techniques on the "age" predictor 
+variable: a step function, polynomial regression, basis spline, and natural 
+spline. 
+
+At each step, we will check for fit quality, noting any potential improvements 
 along the way. We will conclude with a retrospective and summary of what we 
 learned.   
+
+### Step Function
+
+This method's main idea is to `cut` the range of the variable into K 
+different groups. Then, fitting each group with a different constant. 
+Furthermore, we will have only (K-1) coefficient for fitting the K-Step 
+function.
+
+However, there is no standard rule about where to place the knot or how many 
+knots we should include in the analysis. If the natural breakpoints exist, the 
+number of knots and their locations should follow the natural breakpoint. 
+
+In this example, the step function will be applied to the `Age` variable. 
+Besides, `Age` will be cut into six bins. Hence, below is the regression model 
+when using the Step Function on the Age variable.
+
+$$ 
+Wage_i = \beta_{0} + \beta_{1}(Year_i) + \beta_{2}(Education_i) + 
+  \beta_{3}\space I_{(28.3, 38.7]} + \beta_{4}\space I_{(38.7,49]} +
+  \beta_{5}\space I_{(49,59.3]} + \beta_{6}\space I_{(59.3,69.7]} +
+  \beta_{7}\space I_{(69.7,80.1]} + \epsilon_i
+$$
+
+Where $I_{(a,b]}$ is a indicator function of age where this function will equal
+to 1 if the `Age` of that observation satisfies $a < Age \leq b$, and this 
+function will equal to 0 if oterwise.
+
+### Polynomial Regression
+
+Polynomial Regression is a simple method to move beyond the `linearity` from 
+the Linear Regression. This method extends the Linearity property of the Linear
+Regression by adding extra terms of the particular predictor. The terms added
+in the model are obtained by raising the power of the original predictor.
+
+This tutorial will extend the Linearity by adding the polynomial terms of 
+`Age`. Below is the model used in this tutorial.
+
+$$ 
+Wage_i = \beta_{0} + \beta_{1}(Year_i) + \beta_{2}(Education_i) + 
+  \beta_{3}Age_{i} + \beta_{4}Age_{i}^{2} +
+  \beta_{5}Age_{i}^{3} + \epsilon_i
+$$
+
+There is a major point that we have to be careful when using polynomial 
+regression models. The more polynomial terms we added into the model, the more 
+accuracy we will get. However, a higher chance that the model will cause the 
+`overfitting` situation fits the training data nicely but poorly predicts the 
+unseen data (or testing set). 
+
+The rule of thumb about how many polynomial term should be applied points out 
+in the [`An introduction to statistical learning : with applications in R`.](http://faculty.marshall.usc.edu/gareth-james/ISL/) Below is a quote from 
+the book.
+
+> "Generally speaking, it is unusual to use d (the number of polynomial terms) 
+greater than 3 or 4 because for large values of d, the polynomial curve can 
+become overly flexible and can take on some very strange shapes."
+
+### Basis Spline
+
+### Natural Spline
 
 ## Core Analysis {.tabset .tabset-fade .tabset-pills}
 ### Python
@@ -228,7 +291,7 @@ reg wage age year edu
 
 Stata will return the following output:
 ```{r, echo = FALSE, fig.cap = cap_Stata1}
-include_graphics(paste0(path, "Stats506_Project/Stata/stata_reg_output.png"))
+include_graphics2(paste0(main_url, "Stata/Stata_images/stata_reg_output.png"))
 cap_Stata1 <- "Figure 2.1 OLS output for wage ~ age + year + education"
 ```
 
@@ -239,18 +302,13 @@ kdensity r, normal
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Stata2}
-include_graphics(paste0(path, "Stats506_Project/Stata/kernel_dens_reg.jpg"))
+include_graphics2(paste0(main_url, "Stata/Stata_images/kernel_dens_reg.jpg"))
 cap_Stata2 <- "Figure 2.2 Kernel Density Plot"
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Stata3}
-include_graphics(paste0(path, "Stats506_Project/Stata/pnorm_reg.jpg"))
-cap_Stata3 <- "Figure 2.3 Pnorm Plot"
-```
-
-```{r, echo = FALSE, fig.cap = cap_Stata4}
-include_graphics(paste0(path, "Stats506_Project/Stata/qnorm_reg.jpg"))
-cap_Stata4 <- "Figure 2.4 Qnorm Plot"
+include_graphics2(paste0(main_url, "Stata/Stata_images/qnorm_reg.jpg"))
+cap_Stata3 <- "Figure 2.3 Qnorm Plot"
 ```
 
 After looking at these plots we might consider the different relationships that age may have with wage. We can plot the two-way fit between wage and age, our main variables of interest, to compare a basic linear, polynomial, and quadratic fit.   
@@ -259,9 +317,9 @@ After looking at these plots we might consider the different relationships that 
 twoway (scatter wage age) (lfit wage age) (fpfit wage age) (qfit wage age)
 ```
 
-```{r, echo = FALSE, fig.cap = cap_Stata5}
-include_graphics(paste0(path, "Stats506_Project/Stata/scatter_fit_plots.jpg"))
-cap_Stata5 <- "Figure 2.5 Fitted Plot - Linear (red), polynomial (green), 
+```{r, echo = FALSE, fig.cap = cap_Stata4}
+include_graphics2(paste0(main_url, "Stata/Stata_images/scatter_fit_plots.jpg"))
+cap_Stata4 <- "Figure 2.4 Fitted Plot - Linear (red), polynomial (green), 
 and quadratic (yellow) fit"
 ```
 
@@ -277,9 +335,9 @@ reg wage c.age##c.age##c.age year educ
 
 The output in Stata will look like this: 
 
-```{r, echo = FALSE, fig.cap = cap_Stata6}
-include_graphics(paste0(path, "Stats506_Project/Stata/cubic_polynom.png"))
-cap_Stata6 <- "Figure 2.6 Regression with Cubic polynomial for Age"
+```{r, echo = FALSE, fig.cap = cap_Stata5}
+include_graphics2(paste0(main_url, "Stata/Stata_images/scatter_fit_plots.jpg"))
+cap_Stata5 <- "Figure 2.5 Regression with Cubic polynomial for Age"
 ```  
   
 #### Piecewise Step Function Regression
@@ -323,9 +381,9 @@ regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
   year educ, hascons
 ```
 
-```{r, echo = FALSE, fig.cap = cap_Stata7}
-include_graphics(paste0(path, "Stats506_Project/Stata/step_wise.png"))
-cap_Stata7 <- " Figure 2.7 Step-wise regression for Age with 6 bins"
+```{r, echo = FALSE, fig.cap = cap_Stata6}
+include_graphics2(paste0(main_url, "Stata/Stata_images/step_wise.png"))
+cap_Stata6 <- " Figure 2.6 Step-wise regression for Age with 6 bins"
 ```  
 
 After running the regression we can then use the predicted yhats to graph the results: 
@@ -340,9 +398,9 @@ twoway (scatter wage age, sort) ///
   (line yhat age if age >=69.66, sort), xline(28.33 38.66 48.99 59.33 69.66) // this looks awful
 ```
 
-```{r, echo = FALSE, fig.cap = cap_Stata8}
-include_graphics(paste0(path, "Stats506_Project/Stata/Step_function.jpg"))
-cap_Stata8 <- "Figure 2.8 Step-wise regression for Age with 6 bins"
+```{r, echo = FALSE, fig.cap = cap_Stata7}
+include_graphics2(paste0(main_url, "Stata/Stata_images/Step_function.jpg"))
+cap_Stata7 <- "Figure 2.7 Step-wise regression for Age with 6 bins"
 ```  
 
 #### Basis Spline
@@ -361,9 +419,9 @@ bspline, xvar(age) knots(18 35 50 65 80) p(3) gen(_agespt)
 regress wage _agespt* year educ, noconstant
 ```
 
-```{r, echo = FALSE, fig.cap = cap_Stata9}
-include_graphics(paste0(path, "Stats506_Project/Stata/spline_reg.png"))
-cap_Stata9 <- "Figure 2.9 Basis Spline Regression"
+```{r, echo = FALSE, fig.cap = cap_Stata8}
+include_graphics2(paste0(main_url, "Stata/Stata_images/spline_reg.png"))
+cap_Stata8 <- "Figure 2.8 Basis Spline Regression"
 ```  
 
 To look at the fit for age, we can examine the two-way scatter plot between `wage` and `age` using the predicted values of the bivariate regression with splines. 
@@ -375,9 +433,9 @@ twoway (scatter wage age)(line agespt age, sort), legend(off)  ///
   title(Basis Spline for Age)
 ```
 
-```{r, echo = FALSE, fig.cap = cap_Stata10}
-include_graphics(paste0(path, "Stats506_Project/Stata/basis_spline.jpg"))
-cap_Stata10 <- "Figure 2.10 Step-wise regression for Age with 6 bins"
+```{r, echo = FALSE, fig.cap = cap_Stata9}
+include_graphics2(paste0(main_url, "Stata/Stata_images/basis_spline.jpg"))
+cap_Stata9 <- "Figure 2.9 Step-wise regression for Age with 6 bins"
 ```  
 
 #### Natural Spline
@@ -408,20 +466,11 @@ code for the user-written functions is in `User-written function.R`.
   wage, which including the regression line.
   - Another function is `plot_kfold`, which primary for doing the 5-fold cross
   validation to select the degree of freedom for basis and natural spline.
-  
-<details>
- <summary> `User-written function.R` </summary>
 
 ```{r user_written_function, include = FALSE}
-source(paste0(path, "Stats506_Project/R/User-written functions.R"))
+source(paste0(main_url, "R/User-written%20functions.R"))
 ``` 
 
-```{r User-written function.R, warning = FALSE, echo = FALSE}
-readLines(paste0(path, "Stats506_Project/R/User-written functions.R"))
-```
-</details>
-
-\
 ```{r read_data, include = FALSE}
 data <- read.csv(paste0(path, "Stats506_Project/Dataset/data.csv"))
 ```
@@ -440,10 +489,7 @@ kable(edu_val, caption = cap_R1)
 ```
 
 ```{r education_convert}
-data <- data %>% mutate(edu = ifelse(education == "1. < HS Grad", 1, 
-                                     ifelse(education == "2. HS Grad", 2, 
-                                            ifelse(education == "3. Some College", 3,
-                                                   ifelse(education == "4. College Grad", 4, 5)))))
+data <- data %>% mutate(edu = as.numeric(substring(data$education, 1, 1)))
 ```
 
 #### Linear regression.
@@ -453,6 +499,7 @@ Quantile-Quantile plot.
 model_lr <- lm(wage ~ age + edu + year, data = data)
 summary(model_lr)
 ```
+
 ```{r, include = FALSE}
 model_lr <- lm(wage ~ age + edu + year, data = data)
 ```
@@ -540,12 +587,12 @@ The corresponding $R^2$ is 0.2846.
 
 #### Piecewise Linear Regression
 ```{r step_reg, eval = FALSE}
-model_cut <- lm(wage ~ cut(age, 4) + edu + year, data = data)
+model_cut <- lm(wage ~ cut(age, 6) + edu + year, data = data)
 summary(model_cut)
 ```
 
 ```{r, include = FALSE}
-model_cut <- lm(wage ~ cut(age, 4) + edu + year, data = data)
+model_cut <- lm(wage ~ cut(age, 6) + edu + year, data = data)
 ```
 
 ```{r, echo = FALSE}
@@ -555,8 +602,9 @@ tab_model(model_cut)
 Table 3.7 Piecewise-Linear Regression Model
 
 ```{r step_plot, echo = FALSE, fig.cap = fig_R7}
-wage_age(TRUE, 1, y ~ cut(x,4)) +
-  geom_vline(xintercept = c(33.5, 49, 64.5), color = "red")
+wage_age(TRUE, 1, y ~ cut(x,6)) +
+  geom_vline(xintercept = c(28.3, 38.7, 49, 59.3, 69.7), color = "red")
+
 fig_R7 <- paste0("Figure 3.7 Scatter plot between Wage and Age with the
                  step function.")
 ```
@@ -581,44 +629,65 @@ data$CV <- sample(rep(1:5, 600))
 ```
 
 Consider the MSE for basis spline.
-```{r basis_MSE, echo = FALSE, fig.cap = cap_R6}
+```{r basis_MSE, echo = FALSE, fig.cap = cap_R8}
 plot_kfold()
-cap_R6 <- "Figure 3.6 The MSE of the basis spline from performing 
+cap_R8 <- "Figure 3.8 The MSE of the basis spline from performing 
 5-fold cross validation"
 ```
 
-The MSE is lowest when the number of `knot` is equal to 2. Fit the regression 
+The MSE is lowest when the number of `knot` is equal to 1. Fit the regression 
 with basis spline.
 
-```{r basis_reg}
+```{r basis_reg, eval = FALSE}
 model_basis <- lm(wage ~ bs(age, df = 6) + edu + year, data = data)
 summary(model_basis)
 ```
 
-```{r basis_plot, echo = FALSE, fig.cap = cap_R7}
-wage_age(TRUE, 1, y ~ bs(x,df = 6))
-cap_R7 <- "Figure 3.7 Scatter plot between Wage and Age with Regression line.
+```{r, include = FALSE}
+model_basis <- lm(wage ~ bs(age, df = 6) + edu + year, data = data)
+```
+
+```{r, echo = FALSE}
+tab_model(model_basis)
+```
+\
+Table 3.9 Linear Regression Model with cubic basis spline on Age variable.
+
+```{r basis_plot, echo = FALSE, fig.cap = cap_R10}
+wage_age(TRUE, 1, y ~ bs(x, df = 6))
+cap_R10 <- "Figure 3.10 Scatter plot between Wage and Age with Regression line.
 (Basis Spline)"
 ```
 
 
 Then consider the Natural Spline.
-```{r, echo = FALSE, fig.cap = cap_R8}
+```{r, echo = FALSE, fig.cap = cap_R11}
 plot_kfold(bs = FALSE)
-cap_R8 <- "Figure 3.8 The MSE of the natural spline from performing 
+cap_R11 <- "Figure 3.11 The MSE of the natural spline from performing 
 5-fold cross validation"
 ```
 
 The MSE is lowest when the number of `knot` is equal to 4. Fit the regression 
 with natural spline.
-```{r}
-model_natural <- lm(wage ~ ns(age, df = 6) + education + year, data = data)
+
+```{r nat_reg, eval = FALSE}
+model_natural <- lm(wage ~ ns(age, df = 6) + edu + year, data = data)
 summary(model_natural)
 ```
 
-```{r natural_plot, echo = FALSE, fig.cap = cap_R9}
+```{r, include = FALSE}
+model_natural <- lm(wage ~ ns(age, df = 6) + edu + year, data = data)
+```
+
+```{r, echo = FALSE}
+tab_model(model_natural)
+```
+\
+Table 3.12 Linear Regression Model with cubic natural spline on Age variable.
+
+```{r natural_plot, echo = FALSE, fig.cap = cap_R13}
 wage_age(TRUE, 1, y ~ ns(x, df = 6))
-cap_R9 <- "Figure 3.9 Scatter plot between Wage and Age with Regression line.
+cap_R13 <- "Figure 3.13 Scatter plot between Wage and Age with Regression line.
 (Natural Spline)"
 ```
 
@@ -629,9 +698,9 @@ The table below shoed the $R^2$ for each model.
 |---|---|---|---|
 | Linear Regression | xx | 0.2555 | 0.2555 |
 | Cubic Polynomial Regression | xx | 0.2846 | 0.2846 |
-| Piecewise Linear Regression | xx | 0.2882 | 0.2766 |
+| Piecewise Linear Regression | xx | 0.2882 | 0.2758 |
 | Basis Spline | xx | 0.9126 | 0.2864 |
-| Natural Spline | xx | xx | 0.2927 |
+| Natural Spline | xx | xx | 0.2869 |
 
 Table 4.1 The coefficient of determination ($R^2$) for each model from Python,
 STATA and R.

@@ -21,7 +21,7 @@ source(paste0(main_url, "R/EDA.R")) ## Function for EDA
 source(paste0(main_url, "R/User-written%20functions.R")) ## Read functions.
 
 ## Change Education into the numerical variable.
-data <- data %>% mutate(edu = substring(data$education, 1, 1))
+data <- data %>% mutate(edu = as.numeric(substring(data$education, 1, 1)))
 
 ## EDA: Save plots
 ggsave(paste0(path, "R/result_pic/EDA.png"), 
@@ -64,10 +64,11 @@ model_poly <- lm(wage ~ poly(age, 3) + edu + year, data = data)
 summary(model_poly)
 
 ## Step Function
-model_cut <- lm(wage ~ cut(age, 4) + edu + year, data = data)
+model_cut <- lm(wage ~ cut(age, 6) + edu + year, data = data)
 summary(model_cut)
-wage_age(TRUE, 1, y ~ cut(x,4)) +
-  geom_vline(xintercept = c(33.5, 49, 64.5), color = "red")
+wage_age(TRUE, 1, y ~ cut(x,6)) +
+  geom_vline(xintercept = c(28.3, 38.7, 49, 59.3, 69.7), 
+             color = "red")
 
 ## Prepared the data for performing 5-fold cross validation.
 set.seed(1)
@@ -81,6 +82,6 @@ wage_age(TRUE, 1, y ~ bs(x,df = 6))
 
 ## Natural Spline
 plot_kfold(bs = FALSE)
-model_natural <- lm(wage ~ ns(age, df = 6) + education + year, data = data)
+model_natural <- lm(wage ~ ns(age, df = 6) + edu + year, data = data)
 summary(model_natural)
 wage_age(TRUE, 1, y ~ ns(x, df = 6))
