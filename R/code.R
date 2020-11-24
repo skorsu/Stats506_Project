@@ -5,8 +5,15 @@ library(gridExtra) ## This library is also for data visualization.
 library(splines) ## This library is for spline.
 library(RCurl) ## This library is required for reading R file from GitHub
 
-## Load data and user-written functions into R.
+## Set a path for saving the result
 path <- "/Users/kevin/506FA20/Stats506_Project/"
+
+### Create result_pic folder if it does not exist.
+if(! dir.exists(paste0(path, "R/result_pic"))){
+  dir.create(file.path(paste0(path, "R/result_pic")))
+}
+
+## Load data and user-written functions into R.
 main_url <- "https://raw.githubusercontent.com/skorsu/Stats506_Project/main/"
 
 data <- read.csv(paste0(main_url, "Dataset/data.csv")) ## Data
