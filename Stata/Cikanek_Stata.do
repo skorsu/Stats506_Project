@@ -13,6 +13,7 @@
 * To - Do List * 
 *! 1. Complete descriptions of code in .Rmd
 *! 1. Make stata code in the Rmd neater, if possible.
+*! 1. Only include qq plot and kernal desnity plot. 
 *! 1. Need a better visual for the polynomial regression
 *! 1. Complete code for piecewise step function
 *! 		a. Determine best way to visualise results for piecewise 
@@ -39,27 +40,6 @@ describe
 *****************************
 
 reg wage age year edu
-return list
-
-
-putexcel set reg_groupporj
-
-putexcel B2=matrix(r(table)')
-
-putexcel A1="Variable"
-putexcel A2 = "Age"
-putexcel A3 = "Year"
-putexcel A4 = "Education"
-putexcel A5 = "Constant"
-
-putexcel B1 ="Coefficient"
-putexcel C1 ="Std. Error"
-putexcel D1 ="t"
-putexcel E1 ="P-Value"
-putexcel F1 ="lower 95%"
-putexcel G1 ="upper 95%"
-
-
 
 predict r, resid
 kdensity r, normal // plot kernel density with normal density overlay
@@ -99,8 +79,8 @@ reg wage c.age##c.age##c.age year educ
 *************************
 *piecewise step function*
 ************************* 
-
-* try to cut into six bins either by n or by parts of age so 1/6 of age
+* use mksline function for easier binning
+* cut into six bins either by n or by parts of age so 1/6 of age
 * 80-18 = 62 / 6 not decimels for age so 5 cuts, 6 bins 
 hist age, bin(6)
 
@@ -108,50 +88,16 @@ hist age, bin(6)
 * generate 6 age variables, one for each bin * 
 * the age varaible does not have decimels * 
 
-generate age1 = (age - 28.33)
-replace age1 = 0 if (age >= 28.33)
-generate age2 = (age-38.66)
-replace age2 = 0 if age <28.33 | age > 38.66
-generate age3 = (age- 48.99)
-replace age3 = 0 if age <38.66 | age >=48.99
-generate age4 = (age - 59.33)
-replace age4 = 0 if age <48.99 | age >= 59.33 
-generate age5 = (age - 69.66)
-replace age5= 0 if age < 59.33 | age>=69.66
-generate age6 = (age-80)
-replace age6 = 0 if age <69.66
 
-* create intercept variables* 
-
-
-generate int1 = 1
-replace int1 = 0 if age >= 28.33
-generate int2 = 1
-replace int2 = 0 if age <28.33 | age > 38.66
-generate int3 = 1
-replace int3 = 0 if age <38.66 | age >=48.99
-generate int4 = 1
-replace int4 = 0 if age <48.99 | age >= 59.33 
-generate int5 = 1
-replace int5= 0 if age < 59.33 | age>=69.66
-generate int6 = 1
-replace int6 = 0 if age <69.66
+mkspline xage1 28.33 xage2 38.66 xage3 48.99 xage4 59.33 xage5 69.66 xage6 = age
 
 
 
 * stepwise regression * ----------------------------------------------------- * 
 
-regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
-	year educ, hascons
+regress wage xage1 xage2 xage3 xage4 xage5 xage6 ///
+	year educ
 
-
-	
-regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
-	, hascons
-
-
-	
-	
 predict yhat	
 
 * since it is stepwise we need to code the fitted lines this way *
@@ -162,8 +108,6 @@ margins predict(xb) atmeans
 
 
 
-	
-
 twoway (scatter wage age, sort) ///
          (line agefit age if age <28.33, sort) ///
 		 (line agefit age if age >=28.33 & age < 38.66, sort) ///
@@ -172,7 +116,7 @@ twoway (scatter wage age, sort) ///
 		 (line agefit age if age >=59.33 & age<69.66, sort) ///
 		 (line agefit age if age >=69.66, sort), xline(28.33 38.66 48.99 59.33 69.66) // this looks awful
 
-
+		 
 **************
 *basis spline* -------------------------------------------------------------- *
 **************
