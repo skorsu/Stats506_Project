@@ -26,3 +26,6 @@ This function is for creating the scatter plot of `Wage` and `Age`. In addition,
 
 ### plot_kfold
 This function will perform 5-fold cross validation in order to determine the degree of freedom/number of knots for basis spline and natural spline. This function will create a plot along with calculate the MSE for each knots/degree of freedom under the k-fold cross validation process.
+
+## result_pic
+This folder contains the plot used in the .Rmd file

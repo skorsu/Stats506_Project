@@ -23,7 +23,7 @@ We use the `Wage` data provided in the library `ISLR` in R. This dataset was cre
 The dataset can be downloaded R software by using `library(ISLR)`and `Wage` command respectively or download directly from this site. You can found this dataset under the `Dataset` folder.
 
 ## Report
-Here is the [link](https://raw.githack.com/skorsu/Stats506_Project/main/Group_6.html) to view the latest version of the project. The source code for this file is `Group 6.Rmd`.  
+Here is the [link](https://raw.githack.com/skorsu/Stats506_Project/main/Group_6.html) to view the latest version of the project. The source code for this file is `Group_6.Rmd`.  
 
 ## Group: To-Do List
 Since this project is an on-going project, there are some minor issue that we are still working on it. Here is the to-do list.
