@@ -1,12 +1,12 @@
 *-----------------------------------------------------------------------------*
 * Stats 506, Fall 2020 
-* Group Project, Question X
+* Group Project, Regression Splines
 * 
 * This script is a tutorial for using splines in Stata
 * 
 *
 * Author: Erin Cikanek ecikanek@umich.edu
-* Updated: November 12, 2020
+* Updated: November 23, 2020
 *-----------------------------------------------------------------------------*
 // 79: ---------------------------------------------------------------------- *
 
@@ -25,7 +25,7 @@
 * for recoding/naming of variables see 'Data_cleaning.do' file 
 
 
-*cd ~//Users/erincikanek/GitHub/Stats506_Project/Stata // comment out before submission 
+*cd ~//GitHub/Stats506_Project/Stata // comment out before submission 
 *version
 log using cikanek_group_proj.log, text replace
 
@@ -64,6 +64,10 @@ putexcel G1 ="upper 95%"
 predict r, resid
 kdensity r, normal // plot kernel density with normal density overlay
 
+
+
+
+* qq plot INSERT * 
 pnorm r // can help show non-normality in the distribution of the residuals
 
 qnorm r // sensitive to non-normality in the tails
@@ -141,21 +145,44 @@ regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
 	year educ, hascons
 
 
-*use yhat predictions to graph results * 
-predict yhat
+	
+regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
+	, hascons
 
-twoway (scatter wage age) ///
-         (line yhat age if age <28.33, sort) ///
-		 (line yhat age if age >=28.33 & age < 38.66, sort) ///
-		 (line yhat age if age >=38.66 & age < 48.99, sort) ///
-		 (line yhat age if age >=48.99 & age<59.33, sort) ///
-		 (line yhat age if age >=59.33 & age<69.66, sort) ///
-		 (line yhat age if age >=69.66, sort), xline(28.33 38.66 48.99 59.33 69.66) // this looks awful
+
+	
+	
+predict yhat	
+
+* since it is stepwise we need to code the fitted lines this way *
+bysort age: egen agefit = mean(yhat)
+
+* want margins in stata where everything else held at means* 
+margins predict(xb) atmeans
+
+
+
+	
+
+twoway (scatter wage age, sort) ///
+         (line agefit age if age <28.33, sort) ///
+		 (line agefit age if age >=28.33 & age < 38.66, sort) ///
+		 (line agefit age if age >=38.66 & age < 48.99, sort) ///
+		 (line agefit age if age >=48.99 & age<59.33, sort) ///
+		 (line agefit age if age >=59.33 & age<69.66, sort) ///
+		 (line agefit age if age >=69.66, sort), xline(28.33 38.66 48.99 59.33 69.66) // this looks awful
 
 
 **************
 *basis spline* -------------------------------------------------------------- *
 **************
+
+* cross-validataion * 
+
+
+
+
+
  
 * currently use command bspline
 * https://data.princeton.edu/eco572/smoothing2
@@ -163,14 +190,13 @@ twoway (scatter wage age) ///
 bspline, xvar(age) knots(18 35 50 65 80) p(3) gen(_agespt)
 
 
-regress wage _agespt* year educ, noconstant
+regress wage _agespt* year educ
 
-
-regress wage _agespt*, noconstant
+regress wage _agespt*
 predict agespt
 *(option xb assumed; fitted values)
 
-
+* UPDATE PLOTS and REG OUTPUT *
 twoway (scatter wage age)(line agespt age, sort), legend(off)  ///
            title(Basis Spline for Age)
 
@@ -180,12 +206,20 @@ twoway (scatter wage age)(line agespt age, sort), legend(off)  ///
 *However, a restricted cubic spline may be a better choice than a linear spline when working with a very curved function. When using a restricted cubic spline, one obtains a continuous smooth function that is linear before the first knot, a piecewise cubic polynomial between adjacent knots, and linear again after the last knot
 
 
+
+
+* cross-validataion * 
+
+
+
 * use command mkspline to create a cubic/natural spline 
 
 mkspline age_nc=age, cubic knots(18 35 50 65 80)
 
-regress wage age_nc* educ year
 
+
+regress wage age_nc* educ year
+margins, predict(xb) atmeans
 
 * This also looks bad - need to figure out * 
 twoway (scatter wage age)(line age_nc* age, sort), legend(off)  ///
