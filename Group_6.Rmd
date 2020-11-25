@@ -27,7 +27,7 @@ library(linguisticsdown) ## Import Picture form GitHub site.
 ## Erin: "/Users/erincikanek/GitHub/"
 ## Kevin: "/Users/kevin/506FA20/"
 ## Kyle: "~/STATS506/"
-path <- "~/STATS506/"
+path <- "/Users/erincikanek/GitHub/"
 main_url <- "https://raw.githubusercontent.com/skorsu/Stats506_Project/main/"
 ```
 
@@ -609,6 +609,13 @@ This further extension is still being coded. Please see the README.md file.
 include_graphics2(paste0(main_url, "Stata/Stata_images/reg_nat_spline.png"))
 cap_Stata8 <- "Figure 2.9 Natural Spline Regression"
 ``` 
+
+```{r, echo = FALSE, fig.cap = cap_Stata9}
+include_graphics2(paste0(main_url, "Stata/Stata_images/nat_spline.jpg"))
+cap_Stata9 <- "Figure 2.9 Natural Spline for Age "
+```  
+
+
 
 ### R
 Here is the required `libraries` for this tutorial.
