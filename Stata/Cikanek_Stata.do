@@ -10,11 +10,8 @@
 *-----------------------------------------------------------------------------*
 // 79: ---------------------------------------------------------------------- *
 
-* To - Do List * 
-*! 1. Complete descriptions of code in .Rmd
-*! 1. Update Stata code in .Rmd.
-*! 1. Double check visuals match
-// set up: ------------------------------------------------------------------ *
+
+*-------------------------------------- *
 * for recoding/naming of variables see 'Data_cleaning.do' file 
 
 
@@ -72,7 +69,6 @@ twoway (scatter wage age, sort)(line r age, sort), legend(off)  ///
 * 80-18 = 62 / 6 not decimels for age so 5 cuts, 6 bins 
 * display histogram just to see binning before starting
 hist age, bin(6)
-(bin=6, start=18, width=10.333333)
 
 * generate 6 age variables, one for each bin, based on cut points * 
 * the age varaible does not have decimels* 
@@ -100,7 +96,8 @@ twoway (scatter wage age, sort) ///
 		 (line agefit age if age >=48.99 & age<59.33, sort) ///
 		 (line agefit age if age >=59.33 & age<69.66, sort) ///
 		 (line agefit age if age >=69.66, sort), ///
-		 xline(28.33 38.66 48.99 59.33 69.66) 
+		 xline(28.33 38.66 48.99 59.33 69.66) title(Piecewise Step Function) ///
+		 xtitle(Age) ytitle(Wage)
 
 		 
 **************
@@ -121,13 +118,11 @@ predict agespt
 
 * Basis Spline Plot *
 twoway (scatter wage age)(line agespt age, sort), legend(off)  ///
-           title(Basis Spline for Age) xlab(Age) ylab(Wage)
+           title(Basis Spline for Age) xtitle(Age) ytitle(Wage)
 
 
 
 * natural spline * ---------------------------------------------------------- *
-*However, a restricted cubic spline may be a better choice than a linear spline when working with a very curved function. When using a restricted cubic spline, one obtains a continuous smooth function that is linear before the first knot, a piecewise cubic polynomial between adjacent knots, and linear again after the last knot
-
 
 * use command mkspline to create a cubic/natural spline 
 mkspline age_nc=age, cubic knots(18 35 50 65 80)
@@ -142,7 +137,7 @@ predict age_ncs
 
 * Figure for Natural spline * 
 twoway (scatter wage age, sort)(line age_ncs age, sort), legend(off)  ///
-            title(Natural Spline for Age)
+            title(Natural Spline for Age) xtitle(Age) ytitle(Wage)
 
 log close
 
