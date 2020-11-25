@@ -1,0 +1,877 @@
+---
+title: "Stats 506 (F20) Group Project"
+author: 'Group 6: Erin Cikanek, Suppapat Korsurat, Kyle William Schulz'
+date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    df_print: paged
+    theme: journal
+    toc: yes
+    toc_float: true
+  pdf_document:
+    toc: yes
+---
+
+```{r, include = FALSE, echo = FALSE, warning = FALSE}
+library(ggplot2)
+library(tidyverse)
+library(gridExtra)
+library(knitr)
+library(foreign)
+library(png)
+library(linguisticsdown) ## Import Picture form GitHub site.
+```
+
+```{r, include = FALSE}
+## Path for Pictures in the report
+## Erin: "/Users/erincikanek/GitHub/"
+## Kevin: "/Users/kevin/506FA20/"
+## Kyle: "~/STATS506/"
+path <- "~/STATS506/"
+main_url <- "https://raw.githubusercontent.com/skorsu/Stats506_Project/main/"
+```
+
+## Introduction
+Linear regression has become widely known as a backbone of modern statistics. 
+Even as more complex, "black box"-style machine learning techniques increase in
+popularity, many statisticians and researchers still fall back on regression 
+for its interpretability and simpleness. However, linear regression relies on a
+number on assumptions that may not always be true in practice, such as the 
+constant, monotonic linearity of predictor variables in relation to the 
+response. In this guide, we explore the use of splines to help model predictor 
+variables that may have changing relationships across their domain. These 
+techniques help us to match the predictive power seen in some more advanced 
+machine learning algorithms while keeping the benefits gained by using 
+regression. We show examples in three popular statistical modelling languages 
+- python, R, and STATA. 
+
+## Data {.tabset .tabset-fade .tabset-pills}
+In this guide, we will be using the `Wage` dataset from the R package ISLR. 
+This data is also used in the book [Introduction to Statistical Learning](http://faculty.marshall.usc.edu/gareth-james/ISL/). This dataset 
+contains wages from 3,000 Mid-Atlantic, male workers, between the years 
+2003-2009, along with a select number of other personal demographics. We retain
+the variables for `wage`, `age`, `year`, and `education` for our analysis. Our 
+goal is to examine the relationship between age, year, and education and 
+workers' yearly wage. 
+
+Below is a table and plots explaining the variables used in this example.
+
+### Data Structure
+| Variables | Role | Type | Explanation |
+|---|---|---|---|
+|`Wage`| Response | Numerical | Worker's Wage |
+|`Age`| Predictor | Numerical | Age of the worker |
+|`Year`| Predictor | Numerical | Year when the data was collected |
+|`Education`| Predictor | Categorical | The education of that worker |
+
+Table 0.1: Table explaining the type and role, along with the explanation, for
+each variable.
+
+### Plots
+```{r, echo = FALSE, fig.cap = cap_02}
+include_graphics2(paste0(main_url, "R/result_pic/EDA.png"))
+cap_02 <- "Figure 0.2: Histograms and bar charts for variables used in the 
+analysis"
+```
+
+## Method
+We will first calculate a simple linear regression as a baseline. We will then 
+implement four different spline-like techniques on the "age" predictor 
+variable: a step function, polynomial regression, and two versions of regression splines - 
+basis splines and natural splines. 
+
+At each step, we will check for fit quality, noting any potential improvements 
+along the way. We will conclude with a retrospective and summary of what we 
+learned.   
+
+### Polynomial Regression
+
+Polynomial regression is a simple method to move beyond the `linearity` from 
+the Linear Regression. This method extends the linearity property of the linear
+regression by adding extra terms of the particular predictor. The terms added
+in the model are obtained by raising the power of the original predictor.
+
+This tutorial will extend the linearity by adding the polynomial terms of 
+`Age`. Below is the model used in this tutorial.
+
+$$ 
+Wage_i = \beta_{0} + \beta_{1}(Year_i) + \beta_{2}(Education_i) + 
+  \beta_{3}Age_{i} + \beta_{4}Age_{i}^{2} +
+  \beta_{5}Age_{i}^{3} + \epsilon_i
+$$
+
+A rule of thumb about how many polynomial terms should be applied can be found 
+in [`An introduction to statistical learning : with applications in R`.](http://faculty.marshall.usc.edu/gareth-james/ISL/) Below is a quote from 
+the book...
+
+> "Generally speaking, it is unusual to use d (the number of polynomial terms) 
+greater than 3 or 4 because for large values of d, the polynomial curve can 
+become overly flexible and can take on some very strange shapes."
+
+### Step Function
+
+This method's main idea is to `cut` the range of the variable into K 
+different groups. Then, each group can be fit with a different constant. 
+This generates (K-1) coefficients for fitting the K-Step function.
+
+However, there is no standard rule about where to place the knots or how many 
+knots we should include in the analysis. If the natural breakpoints exist, the 
+number of knots and their locations should follow the natural breakpoint. 
+
+In this example, the step function will be applied to the `Age` variable. 
+which will be divided into six bins. Below is the regression model 
+when using the step function on the Age variable.
+
+$$ 
+Wage_i = \beta_{0} + \beta_{1}(Year_i) + \beta_{2}(Education_i) + 
+  \beta_{3}\space I_{(28.3, 38.7]} + \beta_{4}\space I_{(38.7,49]} +
+  \beta_{5}\space I_{(49,59.3]} + \beta_{6}\space I_{(59.3,69.7]} +
+  \beta_{7}\space I_{(69.7,80.1]} + \epsilon_i
+$$
+
+Where $I_{(a,b]}$ is a indicator function of age where this function will equal
+to 1 if the `Age` of that observation satisfies $a < Age \leq b$, and this 
+function will equal to 0 if oterwise.
+
+### Regression Splines
+One major problem of the `Polynomial Regression` is that it requires a high 
+degree of polynomial terms in order to make the model more flexible (or fit 
+the data better). However, this can often lead to an `overfitting` problem. One way
+to avoid this situation is to use a `Regression Spline`.
+
+`Regression Splines` will use a lower degree of the polynomial term but provide
+as much flexibility as the `Polynomial Regression`. The key of this technique is
+mainly about `the number of knots`. `Regression Splines` will keep the polynomial
+term fixed at a lower degree while changing the number of knots. 
+
+There are many ways to `locate where we should put the knots`. One strategy is 
+to place many knots where predictors fluctuate a lot while placing less knots where 
+the predictor does not change as much. Another way is to place them uniformly.
+
+For the `number of knots` we will use, which will define the `degrees of freedom`, we 
+can use `K-Fold Cross Validation` to determine the number of knots.
+
+The difference between `Basis Splines` and `Natural Splines` is that for each 
+boundary of the natural spline, it will be enforced to be a linear function.
+
+In this tutorial, we will use the cubic basis spline and cubic natural spline.
+To determine the degrees of freedom (df), we will use `K-fold Cross Validation` 
+when K is equal to 5. Below is the df for each type of cubic spline.
+
+  - Basis Spline: df = 4 + knots
+  - Natural Spline: df = 2 + knots
+
+## Core Analysis {.tabset .tabset-fade .tabset-pills}
+### Python
+
+First, let's get our environment set up. This section loads the required 
+packages for this tutorial. We will mainly be using pandas for data
+manipulation, statsmodels for modelling, patsy for splines, and matplotlib and 
+seaborn for plotting. You must have these packages installed to continue with 
+the exercise. 
+```{r, eval = FALSE}
+#------------------------------------------------------------------------------#
+#Required Packages
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+import numpy as np
+import os
+import subprocess
+import scipy
+import seaborn as sns
+from patsy import dmatrix, dmatrices 
+
+#Set style for plots 
+plt.style.use('seaborn')
+
+#Add if running in a jupyter notebook 
+#%matplotlib inline
+
+#Create folder to store plot output 
+if not os.path.exists('images'):
+    os.makedirs('images')
+```
+
+To start, we take a look at our data with the head() function. This looks similar 
+to what we would expect from what we know about the data. 
+```{r, eval = FALSE}
+data = pd.read_csv('https://raw.githubusercontent.com/skorsu/Stats506_Project/main/Dataset/data.csv')
+data.head()
+
+#Saving output as png for rmd display 
+data.head().to_html("images/summary_table.html")
+subprocess.call('wkhtmltoimage -f png --width 0 images/summary_table.html images/summary_table.png', 
+                shell=True)
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python1}
+include_graphics2(paste0(main_url, "Python/images/summary_table.png"))
+cap_Python1 <- "Figure 1.1 Summary Table"
+```  
+
+We now need to get the data ready for modelling. We transform the education variable
+into an ordinal numerical representation. 
+```{r, eval = FALSE}
+education_map = {'1. < HS Grad':1, '2. HS Grad':2, '3. Some College':3, 
+                 '4. College Grad':4, '5. Advanced Degree':5}
+data['education'] = data.education.map(education_map)
+```
+
+For our model, we will use age, education, and year to model wage. 
+```{r, eval = FALSE}
+data = data[['wage', 'age', 'education', 'year']]
+```
+
+To start with, let's see what a basic linear regression would give us. From Figure 1.3,
+we can immediately tell that the residuals of our age variable may not be normally 
+distributed. This could result in a poor fit. 
+```{r, eval = FALSE}
+model = sm.OLS(data['wage'], sm.add_constant(data.drop('wage',axis=1))).fit()
+model.summary()
+
+#Saving output as png for rmd display - attribution:
+#https://stackoverflow.com/questions/46664082/python-how-to-save-statsmodels-results-as-image-file
+plt.rc('figure', figsize=(7.5, 7.5))
+plt.text(0.01, 0.05, str(model.summary()), 
+         {'fontsize': 10}, fontproperties = 'monospace') 
+plt.axis('off')
+plt.tight_layout()
+plt.savefig('images/linear_model_summary.png')
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python2}
+include_graphics2(paste0(main_url, "Python/images/linear_model_summary.png"))
+cap_Python2 <- "Figure 1.2 Linear Model Summary"
+```  
+
+```{r, eval = FALSE}
+fig = sm.qqplot(model.resid, scipy.stats.norm, line='r')
+fig.set_size_inches(7.5, 7.5)
+plt.title('QQ Plot (Normal Distribution)')
+plt.show()
+plt.savefig("images/qqplot_lr.png")
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python3}
+include_graphics2(paste0(main_url, "Python/images/qqplot_lr.png"))
+cap_Python3 <- "Figure 1.3 QQ Plot"
+```  
+
+```{r, eval = FALSE}
+pd.Series(model.resid).plot.kde(figsize=(7.5,7.5))
+plt.title('Kernal Density Estimate')
+plt.savefig("images/kde_lr.png")
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python4}
+include_graphics2(paste0(main_url, "Python/images/kde_lr.png"))
+cap_Python4 <- "Figure 1.4 KDE Plot"
+```  
+
+```{r, eval = FALSE}
+fig, ax = plt.subplots(figsize=(7.5,7.5))
+sns.regplot(data['age'],data['wage'])
+plt.title('Age v. Wage (Linear Reg.)')
+plt.xlim([17,81])
+plt.savefig('images/age_v_wage_lr.png')
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python5}
+include_graphics2(paste0(main_url, "Python/images/age_v_wage_lr.png"))
+cap_Python5 <- "Figure 1.5 Age v. Wage (Linear Reg.)"
+``` 
+
+Maybe a cubic polynomial would be better? Looking at the model, we immediately see 
+an improvement. 
+```{r, eval = FALSE}
+plt.figure(figsize=(7.5,7.5))
+p = np.poly1d(np.polyfit(data["age"], data["wage"], 3))
+t = np.linspace(0, 80, 200)
+plt.plot(data["age"], data["wage"], 'o', t, p(t), '-')
+plt.ylabel('Wage')
+plt.xlabel('Age')
+plt.title('Age v. Wage (Cubic Polynomial)')
+plt.show()
+plt.savefig('images/age_v_wage_cubic.png')
+
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python6}
+include_graphics2(paste0(main_url, "Python/images/age_v_wage_cubic.png"))
+cap_Python6 <- "Figure 1.6 Age v. Wage (Cubic Polynomial)"
+``` 
+
+```{r, eval = FALSE}
+#Building model with a cubic polynomial from pandas df
+cubic_model = sm.OLS(data["wage"], sm.add_constant(np.column_stack(
+                                                     [data["age"]**i for i in [1,2,3]] 
+                                                   + [np.array(data['education'])] 
+                                                   + [np.array(data['year'])]))).fit()
+cubic_model.summary(xname=['const','age*1', 'age*2', 'age*3', 'education', 'year'])
+
+#Saving output as png for rmd display - attribution:
+#https://stackoverflow.com/questions/46664082/python-how-to-save-statsmodels-results-as-image-file
+plt.rc('figure', figsize=(7.5, 7.5))
+plt.text(0.01, 0.05, str(cubic_model.summary(xname=['const','age*1', 'age*2', 'age*3', 
+                                                    'education', 'year'])), 
+                                                   {'fontsize': 10}, 
+                                                   fontproperties = 'monospace') 
+plt.axis('off')
+plt.tight_layout()
+plt.savefig('images/cubic_model_summary.png')
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python7}
+include_graphics2(paste0(main_url, "Python/images/cubic_model_summary.png"))
+cap_Python7 <- "Figure 1.7 Cubic Model Summary"
+``` 
+
+Next, we try stepwise regression. Again, we see improvement from the linear model. 
+```{r, eval = FALSE}
+data['age_cut'] = pd.cut(data.age, bins=6, labels=False)
+data = data.merge(pd.get_dummies(data['age_cut']).add_prefix('age_cut_'), 
+                  left_index=True, right_index=True)
+```
+
+```{r, eval = FALSE}
+plt.figure(figsize=(7.5,7.5))
+data.plot.scatter(x='age', y='wage', c='age_cut', colorbar=False)
+plt.ylabel('Wage')
+plt.xlabel('Age')
+plt.title('Age v. Wage (stepwise)')
+plt.savefig('images/age_v_wage_stepwise.png')
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python8}
+include_graphics2(paste0(main_url, "Python/images/age_v_wage_stepwise.png"))
+cap_Python8 <- "Figure 1.8 Age v. Wage (Stepwise)"
+``` 
+
+```{r, eval = FALSE}
+stepwise_model = sm.OLS(data["wage"], sm.add_constant(data.drop(['wage','age','age_cut'],
+                                                                axis=1))).fit()
+stepwise_model.summary()
+
+#Saving output as png for rmd display - attribution:
+#https://stackoverflow.com/questions/46664082/python-how-to-save-statsmodels-results-as-image-file
+plt.rc('figure', figsize=(7.5, 7.5))
+plt.text(0.01, 0.05, str(stepwise_model.summary()), 
+         {'fontsize': 10}, fontproperties = 'monospace') 
+plt.axis('off')
+plt.tight_layout()
+plt.savefig('images/stepwise_model_summary.png')
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python9}
+include_graphics2(paste0(main_url, "Python/images/stepwise_model_summary.png"))
+cap_Python9 <- "Figure 1.9 Stepwise Model Summary"
+``` 
+
+Finally, we move on to splines. 
+```{r, eval = FALSE}
+y_a,X_a = dmatrices('wage ~ bs(age, df=6)', data)
+age_basis_model = sm.OLS(y_a,X_a).fit()
+xs = np.linspace(18, 80, 200)
+plt.plot(data["age"], data["wage"], 'o', xs, age_basis_model.predict(
+    dmatrix("bs(age, df=6)",{"age":xs.reshape(-1,1)}, return_type='dataframe')), '-')
+plt.ylabel('Wage')
+plt.xlabel('Age')
+plt.title('Age v. Wage (Basis Spline)')
+plt.show()
+plt.savefig('images/age_v_wage_basis.png')
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python10}
+include_graphics2(paste0(main_url, "Python/images/age_v_wage_basis.png"))
+cap_Python10 <- "Figure 1.10 Age v. Wage (Basis Spline)"
+``` 
+
+```{r, eval = FALSE}
+y,X = dmatrices('wage ~ education + year + bs(age, df=6)', data)
+basis_model = sm.OLS(y,X).fit()
+basis_model.summary()
+
+#Saving output as png for rmd display - attribution:
+#https://stackoverflow.com/questions/46664082/python-how-to-save-statsmodels-results-as-image-file
+plt.rc('figure', figsize=(7.5, 7.5))
+plt.text(0.01, 0.05, str(basis_model.summary()), 
+         {'fontsize': 10}, fontproperties = 'monospace') 
+plt.axis('off')
+plt.tight_layout()
+plt.savefig('images/basis_model_summary.png')
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python11}
+include_graphics2(paste0(main_url, "Python/images/basis_model_summary.png"))
+cap_Python11 <- "Figure 1.11 Basis Model Summary"
+``` 
+
+```{r, eval = FALSE}
+y_na,X_na = dmatrices('wage ~ cr(age, df=6)', data)
+age_natural_model = sm.OLS(y_na,X_na).fit()
+xs = np.linspace(18, 80, 200)
+plt.plot(data["age"], data["wage"], 'o', xs, age_natural_model.predict(
+    dmatrix("cr(age, df=6)",{"age":xs.reshape(-1,1)}, return_type='dataframe')), '-')
+plt.ylabel('Wage')
+plt.xlabel('Age')
+plt.title('Age v. Wage (Natural Spline)')
+plt.show()
+plt.savefig('images/age_v_wage_natural.png')
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python12}
+include_graphics2(paste0(main_url, "Python/images/age_v_wage_natural.png"))
+cap_Python12 <- "Figure 1.12 Age v. Wage (Natural Spline)"
+``` 
+
+```{r, eval = FALSE}
+y2,X2 = dmatrices("wage ~ education + year + cr(age, df=6)", data)
+natural_model = sm.OLS(y2,X2).fit()
+natural_model.summary()
+
+#Saving output as png for rmd display - attribution:
+#https://stackoverflow.com/questions/46664082/python-how-to-save-statsmodels-results-as-image-file
+plt.rc('figure', figsize=(7.5, 7.5))
+plt.text(0.01, 0.05, str(natural_model.summary()), 
+         {'fontsize': 10}, fontproperties = 'monospace') 
+plt.axis('off')
+plt.tight_layout()
+plt.savefig('images/natural_model_summary.png')
+```
+
+```{r, echo = FALSE, fig.cap = cap_Python13}
+include_graphics2(paste0(main_url, "Python/images/natural_model_summary.png"))
+cap_Python13 <- "Figure 1.13 Natural Model Summary"
+``` 
+
+### Stata
+
+Before starting analysis using splines, first look at OLS regression with wage as it relates to age, year, and education. We can run the simple code below to look at this relationship.
+```{r, eval = FALSE}
+reg wage age year edu
+```
+
+Stata will return the following output:
+```{r, echo = FALSE, fig.cap = cap_Stata1}
+include_graphics2(paste0(main_url, "Stata/Stata_images/stata_reg_output.png"))
+cap_Stata1 <- "Figure 2.1 OLS output for wage ~ age + year + education"
+```
+
+To see if a non-linear relationship might be present, kernal density, pnorm, and qnorm plots can assit with this: 
+```{r, eval = FALSE}
+predict r, resid
+kdensity r, normal
+```
+
+```{r, echo = FALSE, fig.cap = cap_Stata2}
+include_graphics2(paste0(main_url, "Stata/Stata_images/kernel_dens_reg.jpg"))
+cap_Stata2 <- "Figure 2.2 Kernel Density Plot"
+```
+
+```{r, echo = FALSE, fig.cap = cap_Stata3}
+include_graphics2(paste0(main_url, "Stata/Stata_images/qnorm_reg.jpg"))
+cap_Stata3 <- "Figure 2.3 Qnorm Plot"
+```
+
+After looking at these plots we might consider the different relationships that age may have with wage. We can plot the two-way fit between wage and age, our main variables of interest, to compare a basic linear, polynomial, and quadratic fit.   
+
+```{r, eval = FALSE}
+twoway (scatter wage age) (lfit wage age) (fpfit wage age) (qfit wage age)
+```
+
+```{r, echo = FALSE, fig.cap = cap_Stata4}
+include_graphics2(paste0(main_url, "Stata/Stata_images/scatter_fit_plots.jpg"))
+cap_Stata4 <- "Figure 2.4 Fitted Plot - Linear (red), polynomial (green), 
+and quadratic (yellow) fit"
+```
+
+Based on these plots we might be interested in trying to fit a cubic polynomial plot next. 
+
+#### Cubic Polynomial
+
+To create a cubic polynomial in stata we can use the `##` command with the `age` variable. The regression is written as before with the addition of a cubic fit:
+  
+```{r, eval = FALSE}
+reg wage c.age##c.age##c.age year educ
+```
+
+The output in Stata will look like this: 
+
+```{r, echo = FALSE, fig.cap = cap_Stata5}
+include_graphics2(paste0(main_url, "Stata/Stata_images/scatter_fit_plots.jpg"))
+cap_Stata5 <- "Figure 2.5 Regression with Cubic polynomial for Age"
+```  
+  
+#### Piecewise Step Function Regression
+
+For the piecewise step function, the steps and intercepts in Stata must be determined manually. Based on analysis in `R` we determined that including 6 groups with 5 cutpoints is best. The below code shows how to generate six age categories and their intercepts. 
+
+```{r, eval = FALSE}
+* generate 6 age variables, one for each bin * 
+  * the age varaible does not have decimels * 
+  generate age1 = (age - 28.33)
+replace age1 = 0 if (age >= 28.33)
+  generate age2 = (age-38.66)
+replace age2 = 0 if age <28.33 | age > 38.66
+generate age3 = (age- 48.99)
+replace age3 = 0 if age <38.66 | age >=48.99
+generate age4 = (age - 59.33)
+replace age4 = 0 if age <48.99 | age >= 59.33 
+generate age5 = (age - 69.66)
+replace age5= 0 if age < 59.33 | age>=69.66
+generate age6 = (age-80)
+replace age6 = 0 if age <69.66
+* create intercept variables* 
+  generate int1 = 1
+replace int1 = 0 if age >= 28.33
+generate int2 = 1
+replace int2 = 0 if age <28.33 | age > 38.66
+generate int3 = 1
+replace int3 = 0 if age <38.66 | age >=48.99
+generate int4 = 1
+replace int4 = 0 if age <48.99 | age >= 59.33 
+generate int5 = 1
+replace int5= 0 if age < 59.33 | age>=69.66
+generate int6 = 1
+replace int6 = 0 if age <69.66
+```
+
+Using these variables we can then compute a step-wise regression. 
+
+```{r, eval = FALSE}
+regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
+  year educ, hascons
+```
+
+```{r, echo = FALSE, fig.cap = cap_Stata6}
+include_graphics2(paste0(main_url, "Stata/Stata_images/step_wise.png"))
+cap_Stata6 <- " Figure 2.6 Step-wise regression for Age with 6 bins"
+```  
+
+After running the regression we can then use the predicted yhats to graph the results: 
+```{r, eval = FALSE}
+predict yhat
+twoway (scatter wage age, sort) ///
+  (line yhat age if age <28.33, sort) ///
+  (line yhat age if age >=28.33 & age < 38.66, sort) ///
+  (line yhat age if age >=38.66 & age < 48.99, sort) ///
+  (line yhat age if age >=48.99 & age<59.33, sort) ///
+  (line yhat age if age >=59.33 & age<69.66, sort) ///
+  (line yhat age if age >=69.66, sort), xline(28.33 38.66 48.99 59.33 69.66) // this looks awful
+```
+
+```{r, echo = FALSE, fig.cap = cap_Stata7}
+include_graphics2(paste0(main_url, "Stata/Stata_images/Step_function.jpg"))
+cap_Stata7 <- "Figure 2.7 Step-wise regression for Age with 6 bins"
+```  
+
+#### Basis Spline
+For the basis spline, we use the command `bspline`, created by Roger Newson and
+suggested by [Germán Rodríguez at Princeton](https://data.princeton.edu/eco572/smoothing2).
+To create the spline, we call `bspline`, setting the x variable to age and then
+identifying where we would like the knots in the function. For this example I 
+use 3 knots at 35, 50 and 65, however it should be noted that the min and max 
+of the values need to be included in the knots parentheses. I also use a cubic 
+spline, incidated by `p(3)`. The last step in the line of code is the code that
+generates the splines for inclusions in the regression. Then the regression can
+be written as below.    
+
+```{r, eval = FALSE}
+bspline, xvar(age) knots(18 35 50 65 80) p(3) gen(_agespt)
+regress wage _agespt* year educ, noconstant
+```
+
+```{r, echo = FALSE, fig.cap = cap_Stata8}
+include_graphics2(paste0(main_url, "Stata/Stata_images/spline_reg.png"))
+cap_Stata8 <- "Figure 2.8 Basis Spline Regression"
+```  
+
+To look at the fit for age, we can examine the two-way scatter plot between `wage` and `age` using the predicted values of the bivariate regression with splines. 
+```{r, eval = FALSE}
+regress wage _agespt*, noconstant
+predict agespt
+*(option xb assumed; fitted values)
+twoway (scatter wage age)(line agespt age, sort), legend(off)  ///
+  title(Basis Spline for Age)
+```
+
+```{r, echo = FALSE, fig.cap = cap_Stata9}
+include_graphics2(paste0(main_url, "Stata/Stata_images/basis_spline.jpg"))
+cap_Stata9 <- "Figure 2.9 Step-wise regression for Age with 6 bins"
+```  
+
+#### Natural Spline
+This further extension is still being coded. Please see the README.md file. 
+
+### R
+Here is the required `libraries` for this tutorial.
+```{r, warning = FALSE}
+library(tidyverse) ## This library is for data manipulation.
+library(ggplot2) ## This library is for data visualization.
+library(gridExtra) ## This library is also for data visualization.
+library(splines) ## This library is for spline.
+```
+
+```{r, include = FALSE, warning = FALSE}
+## These packages' objective is to create the output of the regression model
+## nicely.
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+```
+
+
+In this example, the author has written two additional functions. All of the 
+code for the user-written functions is in `User-written function.R`.
+
+  - `wage_age` This function is for plotting the scatter plot between age and 
+  wage, which including the regression line.
+  - Another function is `plot_kfold`, which primary for doing the 5-fold cross
+  validation to select the degree of freedom for basis and natural spline.
+
+```{r user_written_function, include = FALSE}
+source(paste0(main_url, "R/User-written%20functions.R"))
+``` 
+
+```{r read_data, include = FALSE}
+data <- read.csv(paste0(path, "Stats506_Project/Dataset/data.csv"))
+```
+
+For the simplicity, the author decided to convert `Education` variable into
+numerical variable.
+
+```{r edu_value, echo = FALSE, warning = FALSE, comment = ""}
+edu_val <- data.frame(data %>% 
+                        distinct(education) %>% 
+                        arrange(education), 
+                      1:5)
+colnames(edu_val) <- c("Old Value", "New Value")
+cap_R1 = "Table 3.1 The converted value of the Education variable."
+kable(edu_val, caption = cap_R1)
+```
+
+```{r education_convert}
+data <- data %>% mutate(edu = as.numeric(substring(data$education, 1, 1)))
+```
+
+#### Linear regression.
+First, consider the linear regression. Below is a model, along with the 
+Quantile-Quantile plot.
+```{r, eval = FALSE}
+model_lr <- lm(wage ~ age + edu + year, data = data)
+summary(model_lr)
+```
+
+```{r, include = FALSE}
+model_lr <- lm(wage ~ age + edu + year, data = data)
+```
+
+```{r, echo = FALSE}
+tab_model(model_lr)
+```
+
+\
+Table 3.2 Regression Model when using `age` directly.
+
+According to table 3.2, we can conclude that the model is $Wage = -2142.85 + 
+0.58(Age) + 15.92(Edu) + 1.09(Year)$. In addition, the $R^2$ for this model 
+is 0.2555 which is quite low. Hence, I will look at the Quantile-Quantile plot
+for the residual, one of the linear regression's assumption, in order to see 
+that whether the model violates the assumption or not.
+
+```{r qq_kernel, echo = FALSE, fig.cap = cap_R3}
+cap_R3 <- "Figure 3.3 The QQ plot, along with the Kernel density plot of the 
+residual from the linear regression."
+
+set.seed(1) ## For the reproducible plot.
+
+p1 <- data.frame(resi = model_lr$residuals) %>%
+  ggplot(aes(sample = resi)) +
+  stat_qq(color = "darkblue") +
+  stat_qq_line(color = "red", linetype = "dashed") +
+  theme_bw() +
+  labs(title = "The QQ plot of the residuals", 
+       x = "Inverse Normal",
+       y = "Residuals")
+
+p2 <- data.frame(resi = model_lr$residuals) %>%
+  ggplot(aes(x = resi)) +
+  geom_density(color = "darkblue") +
+  geom_density(data = data.frame(resi = rnorm(10000,0,sd(model_lr$residuals))),
+               color = "red") +
+  theme_bw() +
+  labs(title = "Kernel Density Estimate",
+       x = "Residual",
+       y = "Density")
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+```{r scatter, echo = FALSE, fig.cap = cap_R4}
+wage_age(line = TRUE)
+cap_R4 <- paste0("Figure 3.4 Scatter plot between Wage and Age")
+```
+
+According to the Figure 3.3 (Left), you will notice that the residuals are not 
+normally distributed since there are some datapoints do not lie on the line.
+
+Apart from the Figure 3.3, Figure 3.4 also shows that the relationship between
+`Wage` and `Age` is not a linear; therefore, this tutorial will try different
+type of relationship between `Wage` and `Age`.
+
+#### Cubic Polynomial Regression
+The first type that we will consider is the `Polynomial Regression`. In order
+to use this regression, you have to use `poly()` function in `lm()`. 
+```{r poly_reg, eval = FALSE}
+model_poly <- lm(wage ~ poly(age, 3) + edu + year, data = data)
+summary(model_poly)
+```
+
+```{r, include = FALSE}
+model_poly <- lm(wage ~ poly(age, 3) + edu + year, data = data)
+```
+
+```{r, echo = FALSE}
+tab_model(model_poly)
+```
+\
+Table 3.5 Cubic Polynomial Regression Model
+
+```{r cubic_plot, echo = FALSE, fig.cap = cap_R6}
+wage_age(line = TRUE, poly = 3, y ~ poly(x,3))
+cap_R6 <- paste0("Figure 3.6 Scatter plot between Wage and Age with a line 
+                 indicate the cubic polynomial regression")
+```
+
+According to the table 3.5, the model is $Wage = -2330.05 + 369.89(Age) - 
+383.49(Age)^{2} + 80.58(Age)^{3} + 15.30(Edu) + 1.19(Year)$. 
+The corresponding $R^2$ is 0.2846.
+
+#### Piecewise Linear Regression
+```{r step_reg, eval = FALSE}
+model_cut <- lm(wage ~ cut(age, 6) + edu + year, data = data)
+summary(model_cut)
+```
+
+```{r, include = FALSE}
+model_cut <- lm(wage ~ cut(age, 6) + edu + year, data = data)
+```
+
+```{r, echo = FALSE}
+tab_model(model_cut)
+```
+\
+Table 3.7 Piecewise-Linear Regression Model
+
+```{r step_plot, echo = FALSE, fig.cap = fig_R7}
+wage_age(TRUE, 1, y ~ cut(x,6)) +
+  geom_vline(xintercept = c(28.3, 38.7, 49, 59.3, 69.7), color = "red")
+
+fig_R7 <- paste0("Figure 3.7 Scatter plot between Wage and Age with the
+                 step function.")
+```
+
+According to the table 3.7, the model is $Wage = -2492.40 + 
+21.34I_{33.5 < Age \leq 49} + 19.89I_{49 < Age \leq 64.5} +
+9.20I_{64.5 < Age \leq 80.1} + 15.76(Edu) + 1.27(Year)$ where I is an indicator
+function. The corresponding $R^2$ is 0.2766.
+
+#### Basis Spline
+In R, we will use bs() for the basis spline. Also, we have to specify the 
+number of knot or the degree of freedom. In this tutorial, we will determine 
+the degree of freedom instead of the number of knot. 
+
+```{r k_fold_cv, include = FALSE}
+set.seed(1)
+data$CV <- sample(rep(1:5, 600))
+```
+
+Consider the MSE for basis spline.
+```{r basis_MSE, echo = FALSE, fig.cap = cap_R8}
+plot_kfold()
+cap_R8 <- "Figure 3.8 The MSE of the basis spline from performing 
+5-fold cross validation"
+```
+
+Figure 3.8 shows that the MSE is the lowest when the degree of freedom is equal
+to 6. Then, we will fit the regression witht the basis spline with degree of 
+freedom equal to 6.
+
+```{r basis_reg, eval = FALSE}
+model_basis <- lm(wage ~ bs(age, df = 6) + edu + year, data = data)
+summary(model_basis)
+```
+
+```{r, include = FALSE}
+model_basis <- lm(wage ~ bs(age, df = 6) + edu + year, data = data)
+```
+
+```{r, echo = FALSE}
+tab_model(model_basis)
+```
+\
+Table 3.9 Linear Regression Model with cubic basis spline on Age variable.
+
+```{r basis_plot, echo = FALSE, fig.cap = cap_R10}
+wage_age(TRUE, 1, y ~ bs(x, df = 6))
+cap_R10 <- "Figure 3.10 Scatter plot between Wage and Age with Regression line.
+(Basis Spline)"
+```
+
+#### Natural Spline
+Similar to the basis spline, we will use ns() in R. Also, we have to specify 
+the number of knot or the degree of freedom.  In this tutorial, we will 
+determine the degree of freedom instead of the number of knot. 
+
+```{r, echo = FALSE, fig.cap = cap_R11}
+plot_kfold(bs = FALSE)
+cap_R11 <- "Figure 3.11 The MSE of the natural spline from performing 
+5-fold cross validation"
+```
+
+Figure 3.11 shows that the MSE is the lowest when the degree of freedom is 
+equal to 6. Then, we will fit the regression witht the natural spline with 
+degree of freedom equal to 6.
+
+```{r nat_reg, eval = FALSE}
+model_natural <- lm(wage ~ ns(age, df = 6) + edu + year, data = data)
+summary(model_natural)
+```
+
+```{r, include = FALSE}
+model_natural <- lm(wage ~ ns(age, df = 6) + edu + year, data = data)
+```
+
+```{r, echo = FALSE}
+tab_model(model_natural)
+```
+\
+Table 3.12 Linear Regression Model with cubic natural spline on Age variable.
+
+```{r natural_plot, echo = FALSE, fig.cap = cap_R13}
+wage_age(TRUE, 1, y ~ ns(x, df = 6))
+cap_R13 <- "Figure 3.13 Scatter plot between Wage and Age with Regression line.
+(Natural Spline)"
+```
+
+## Summary
+The table below shoed the $R^2$ for each model.
+
+| Model | Python | STATA | R |
+|---|---|---|---|
+| Linear Regression | 0.256 | 0.256 | 0.256 |
+| Cubic Polynomial Regression | 0.285 | 0.285 | 0.285 |
+| Piecewise Linear Regression | 0.276 | 0.288 | 0.276 |
+| Basis Spline | 0.286 | 0.913 | 0.286 |
+| Natural Spline | 0.287 | xx | 0.287 |
+
+Table 4.1 The coefficient of determination ($R^2$) for each model from Python,
+STATA and R.
+
+## Discussion
+## Reference
+- Gareth James, Daniela Witten, Trevor Hastie, Robert Tibshirani. (2013). 
+[An introduction to statistical learning : with applications in R](http://faculty.marshall.usc.edu/gareth-james/ISL/). New York :Springer,
+
+- Data Description: https://rdrr.io/cran/ISLR/man/Wage.html
