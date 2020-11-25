@@ -27,7 +27,7 @@ library(linguisticsdown) ## Import Picture form GitHub site.
 ## Erin: "/Users/erincikanek/GitHub/"
 ## Kevin: "/Users/kevin/506FA20/"
 ## Kyle: "~/STATS506/"
-path <- "~/STATS506/"
+path <- "/Users/erincikanek/GitHub/"
 main_url <- "https://raw.githubusercontent.com/skorsu/Stats506_Project/main/"
 ```
 
@@ -447,6 +447,10 @@ cap_Python13 <- "Figure 1.13 Natural Model Summary"
 
 ### Stata
 
+For the Stata anlysis, we briefly examine the results of a simple OLS regression and then move on to polynomial, piecewise, cubic and natural splines. Stata in many ways is not as flexible as `R`, especially because of `.Rmd` and its lack of `ggplot`. Thus simple figures are included for Stata for comparison, but we recommend that `R` is used for papers and analysis. 
+
+
+#### OLS
 Before starting analysis using splines, first look at OLS regression with wage as it relates to age, year, and education. We can run the simple code below to look at this relationship.
 ```{r, eval = FALSE}
 reg wage age year edu
@@ -458,20 +462,20 @@ include_graphics2(paste0(main_url, "Stata/Stata_images/stata_reg_output.png"))
 cap_Stata1 <- "Figure 2.1 OLS output for wage ~ age + year + education"
 ```
 
-To see if a non-linear relationship might be present, kernal density, pnorm, and qnorm plots can assit with this: 
+To see if a non-linear relationship might be present, a qq plot and a kernal density plots are examined: 
 ```{r, eval = FALSE}
 predict r, resid
 kdensity r, normal
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Stata2}
-include_graphics2(paste0(main_url, "Stata/Stata_images/kernel_dens_reg.jpg"))
-cap_Stata2 <- "Figure 2.2 Kernel Density Plot"
+include_graphics2(paste0(main_url, "Stata/Stata_images/qqplot.jpg"))
+cap_Stata2 <- "Figure 2.2 QQ Plot"
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Stata3}
-include_graphics2(paste0(main_url, "Stata/Stata_images/qnorm_reg.jpg"))
-cap_Stata3 <- "Figure 2.3 Qnorm Plot"
+include_graphics2(paste0(main_url, "Stata/Stata_images/kernel_dens_reg.jpg"))
+cap_Stata3 <- "Figure 2.3 Kernal Density Plot"
 ```
 
 After looking at these plots we might consider the different relationships that age may have with wage. We can plot the two-way fit between wage and age, our main variables of interest, to compare a basic linear, polynomial, and quadratic fit.   
@@ -499,53 +503,31 @@ reg wage c.age##c.age##c.age year educ
 The output in Stata will look like this: 
 
 ```{r, echo = FALSE, fig.cap = cap_Stata5}
-include_graphics2(paste0(main_url, "Stata/Stata_images/scatter_fit_plots.jpg"))
+include_graphics2(paste0(main_url, "Stata/Stata_images/cubic_polynom.png"))
 cap_Stata5 <- "Figure 2.5 Regression with Cubic polynomial for Age"
 ```  
   
+
+  
+  
+  
 #### Piecewise Step Function Regression
 
-For the piecewise step function, the steps and intercepts in Stata must be determined manually. Based on analysis in `R` we determined that including 6 groups with 5 cutpoints is best. The below code shows how to generate six age categories and their intercepts. 
+For the piecewise step function, the `mkpline` command offers an easy way to create steps based on user-determined cut-points. Based on analysis in `R` we determined that including 6 groups with 5 cutpoints is best. The below code shows how to generate six age categories. 
 
 ```{r, eval = FALSE}
-* generate 6 age variables, one for each bin * 
-  * the age varaible does not have decimels * 
-  generate age1 = (age - 28.33)
-replace age1 = 0 if (age >= 28.33)
-  generate age2 = (age-38.66)
-replace age2 = 0 if age <28.33 | age > 38.66
-generate age3 = (age- 48.99)
-replace age3 = 0 if age <38.66 | age >=48.99
-generate age4 = (age - 59.33)
-replace age4 = 0 if age <48.99 | age >= 59.33 
-generate age5 = (age - 69.66)
-replace age5= 0 if age < 59.33 | age>=69.66
-generate age6 = (age-80)
-replace age6 = 0 if age <69.66
-* create intercept variables* 
-  generate int1 = 1
-replace int1 = 0 if age >= 28.33
-generate int2 = 1
-replace int2 = 0 if age <28.33 | age > 38.66
-generate int3 = 1
-replace int3 = 0 if age <38.66 | age >=48.99
-generate int4 = 1
-replace int4 = 0 if age <48.99 | age >= 59.33 
-generate int5 = 1
-replace int5= 0 if age < 59.33 | age>=69.66
-generate int6 = 1
-replace int6 = 0 if age <69.66
+
 ```
 
 Using these variables we can then compute a step-wise regression. 
 
 ```{r, eval = FALSE}
-regress wage int1 int2 int3 int4 int5 int6 age1 age2 age3 age4 age5 age6 ///
+regress wage  ///
   year educ, hascons
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Stata6}
-include_graphics2(paste0(main_url, "Stata/Stata_images/step_wise.png"))
+include_graphics2(paste0(main_url, "Stata/Stata_images/step_reg.png"))
 cap_Stata6 <- " Figure 2.6 Step-wise regression for Age with 6 bins"
 ```  
 
@@ -562,7 +544,7 @@ twoway (scatter wage age, sort) ///
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Stata7}
-include_graphics2(paste0(main_url, "Stata/Stata_images/Step_function.jpg"))
+include_graphics2(paste0(main_url, "Stata/Stata_images/Step_function2.jpg"))
 cap_Stata7 <- "Figure 2.7 Step-wise regression for Age with 6 bins"
 ```  
 
@@ -583,7 +565,7 @@ regress wage _agespt* year educ, noconstant
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Stata8}
-include_graphics2(paste0(main_url, "Stata/Stata_images/spline_reg.png"))
+include_graphics2(paste0(main_url, "Stata/Stata_images/basis_spline_reg.png"))
 cap_Stata8 <- "Figure 2.8 Basis Spline Regression"
 ```  
 
@@ -603,6 +585,18 @@ cap_Stata9 <- "Figure 2.9 Step-wise regression for Age with 6 bins"
 
 #### Natural Spline
 This further extension is still being coded. Please see the README.md file. 
+
+
+```{r, echo = FALSE, fig.cap = cap_Stata8}
+include_graphics2(paste0(main_url, "Stata/Stata_images/reg_nat_spline.png"))
+cap_Stata8 <- "Figure 2.9 Natural Spline Regression"
+```  
+
+
+
+
+
+
 
 ### R
 Here is the required `libraries` for this tutorial.
@@ -863,8 +857,8 @@ The table below shoed the $R^2$ for each model.
 | Linear Regression | 0.256 | 0.256 | 0.256 |
 | Cubic Polynomial Regression | 0.285 | 0.285 | 0.285 |
 | Piecewise Linear Regression | 0.276 | 0.288 | 0.276 |
-| Basis Spline | 0.286 | 0.913 | 0.286 |
-| Natural Spline | 0.287 | xx | 0.287 |
+| Basis Spline | 0.286 | 0.286 | 0.286 |
+| Natural Spline | 0.287 | 0.286 | 0.287 |
 
 Table 4.1 The coefficient of determination ($R^2$) for each model from Python,
 STATA and R.
