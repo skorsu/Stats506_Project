@@ -67,6 +67,7 @@ plt.text(0.01, 0.05, str(model.summary()),
 plt.axis('off')
 plt.tight_layout()
 plt.savefig('images/linear_model_summary.png')
+plt.close()
 
 
 # In[6]:
@@ -76,6 +77,7 @@ fig = sm.qqplot(model.resid, scipy.stats.norm, line='r')
 fig.set_size_inches(7.5, 7.5)
 plt.title('QQ Plot (Normal Distribution)')
 plt.savefig("images/qqplot_lr.png")
+plt.close()
 
 
 # In[7]:
@@ -84,6 +86,7 @@ plt.savefig("images/qqplot_lr.png")
 pd.Series(model.resid).plot.kde(figsize=(7.5,7.5))
 plt.title('Kernal Density Estimate')
 plt.savefig("images/kde_lr.png")
+plt.close()
 
 
 # In[8]:
@@ -94,6 +97,7 @@ sns.regplot(data['age'],data['wage'])
 plt.title('Age v. Wage (Linear Reg.)')
 plt.xlim([17,81])
 plt.savefig('images/age_v_wage_lr.png')
+plt.close()
 
 
 # In[9]:
@@ -107,6 +111,7 @@ plt.ylabel('Wage')
 plt.xlabel('Age')
 plt.title('Age v. Wage (Cubic Polynomial)')
 plt.savefig('images/age_v_wage_cubic.png')
+plt.close()
 
 
 # In[10]:
@@ -129,6 +134,7 @@ plt.text(0.01, 0.05, str(cubic_model.summary(xname=['const','age*1', 'age*2', 'a
 plt.axis('off')
 plt.tight_layout()
 plt.savefig('images/cubic_model_summary.png')
+plt.close()
 
 
 # In[11]:
@@ -148,6 +154,7 @@ plt.ylabel('Wage')
 plt.xlabel('Age')
 plt.title('Age v. Wage (stepwise)')
 plt.savefig('images/age_v_wage_stepwise.png')
+plt.close()
 
 
 # In[13]:
@@ -165,6 +172,7 @@ plt.text(0.01, 0.05, str(stepwise_model.summary()),
 plt.axis('off')
 plt.tight_layout()
 plt.savefig('images/stepwise_model_summary.png')
+plt.close()
 
 
 # In[14]:
@@ -179,6 +187,7 @@ plt.ylabel('Wage')
 plt.xlabel('Age')
 plt.title('Age v. Wage (Basis Spline)')
 plt.savefig('images/age_v_wage_basis.png')
+plt.close()
 
 
 # In[15]:
@@ -196,6 +205,7 @@ plt.text(0.01, 0.05, str(basis_model.summary()),
 plt.axis('off')
 plt.tight_layout()
 plt.savefig('images/basis_model_summary.png')
+plt.close()
 
 
 # In[16]:
@@ -210,6 +220,7 @@ plt.ylabel('Wage')
 plt.xlabel('Age')
 plt.title('Age v. Wage (Natural Spline)')
 plt.savefig('images/age_v_wage_natural.png')
+plt.close()
 
 
 # In[17]:
@@ -227,6 +238,7 @@ plt.text(0.01, 0.05, str(natural_model.summary()),
 plt.axis('off')
 plt.tight_layout()
 plt.savefig('images/natural_model_summary.png')
+plt.close()
 
 
 # In[ ]:
