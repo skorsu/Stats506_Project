@@ -13,7 +13,6 @@
 * To - Do List * 
 *! 1. Complete descriptions of code in .Rmd
 *! 1. Make stata code in the Rmd neater, if possible.
-*! 1. Only include qq plot and kernal desnity plot. 
 *! 1. Need a better visual for the polynomial regression
 *! 1. Complete code for piecewise step function
 *! 		a. Determine best way to visualise results for piecewise 
@@ -26,8 +25,8 @@
 * for recoding/naming of variables see 'Data_cleaning.do' file 
 
 
-*cd ~//GitHub/Stats506_Project/Stata // comment out before submission 
-*version
+*cd ~//GitHub/Stats506_Project/Stata 
+
 log using cikanek_group_proj.log, text replace
 
 * open data* 
@@ -41,22 +40,19 @@ describe
 
 reg wage age year edu
 
+
+* store residuals for plots *
 predict r, resid
+
+
+* kernal density plot * 
 kdensity r, normal // plot kernel density with normal density overlay
 
+* qq plot * 
+qnorm r, ///
+	 title(QQ Plot of Residuals)
 
-
-
-* qq plot INSERT * 
-pnorm r // can help show non-normality in the distribution of the residuals
-
-qnorm r // sensitive to non-normality in the tails
-
-
-* check homoscedasticity of residuals 
-rvfplot, yline(0) //line at 0 to better shows middle of iid 
-
-
+	 
 * checking the linearity * 
 twoway (scatter wage age) (lfit wage age) //example shows lowess but is there a way to use splines?
 
@@ -96,7 +92,7 @@ mkspline xage1 28.33 xage2 38.66 xage3 48.99 xage4 59.33 xage5 69.66 xage6 = age
 * stepwise regression * ----------------------------------------------------- * 
 
 regress wage xage1 xage2 xage3 xage4 xage5 xage6 ///
-	year educ
+	year educ 
 
 predict yhat	
 
