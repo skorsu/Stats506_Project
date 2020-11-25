@@ -85,12 +85,36 @@ analysis"
 ## Method
 We will first calculate a simple linear regression as a baseline. We will then 
 implement four different spline-like techniques on the "age" predictor 
-variable: a step function, polynomial regression, basis spline, and natural 
-spline. 
+variable: a step function, polynomial regression, regression splines which are
+basis spline, and natural spline. 
 
 At each step, we will check for fit quality, noting any potential improvements 
 along the way. We will conclude with a retrospective and summary of what we 
 learned.   
+
+### Polynomial Regression
+
+Polynomial Regression is a simple method to move beyond the `linearity` from 
+the Linear Regression. This method extends the Linearity property of the Linear
+Regression by adding extra terms of the particular predictor. The terms added
+in the model are obtained by raising the power of the original predictor.
+
+This tutorial will extend the Linearity by adding the polynomial terms of 
+`Age`. Below is the model used in this tutorial.
+
+$$ 
+Wage_i = \beta_{0} + \beta_{1}(Year_i) + \beta_{2}(Education_i) + 
+  \beta_{3}Age_{i} + \beta_{4}Age_{i}^{2} +
+  \beta_{5}Age_{i}^{3} + \epsilon_i
+$$
+
+The rule of thumb about how many polynomial term should be applied points out 
+in the [`An introduction to statistical learning : with applications in R`.](http://faculty.marshall.usc.edu/gareth-james/ISL/) Below is a quote from 
+the book.
+
+> "Generally speaking, it is unusual to use d (the number of polynomial terms) 
+greater than 3 or 4 because for large values of d, the polynomial curve can 
+become overly flexible and can take on some very strange shapes."
 
 ### Step Function
 
@@ -118,39 +142,33 @@ Where $I_{(a,b]}$ is a indicator function of age where this function will equal
 to 1 if the `Age` of that observation satisfies $a < Age \leq b$, and this 
 function will equal to 0 if oterwise.
 
-### Polynomial Regression
+### Regrssion Spline
+One major problem of the `Polynomial Regression` is that it required a high 
+degree of polynomial terms in order to make the model more flexible (or fit 
+the data better). However, this will lead to an `overfitting` problem. One way
+to avoid this situation is to use the `Regression Spline`.
 
-Polynomial Regression is a simple method to move beyond the `linearity` from 
-the Linear Regression. This method extends the Linearity property of the Linear
-Regression by adding extra terms of the particular predictor. The terms added
-in the model are obtained by raising the power of the original predictor.
+`Regression Spline` will use a lower degree of the polynomial term but provide
+as much flexibility as the `Polynomial Regression`. The key of this technic is
+mainly about `the number of knot`. `Regression Spline` will keep the polynomial
+term fixed at a lower degree while changing the number of knot. 
 
-This tutorial will extend the Linearity by adding the polynomial terms of 
-`Age`. Below is the model used in this tutorial.
+There are many way to `locate where should we put the knots`. The first one is 
+to place many knots where that predictors fluctuate a lot while less knot where 
+the predictor does not change much. The second way is to place them uniformlly.
 
-$$ 
-Wage_i = \beta_{0} + \beta_{1}(Year_i) + \beta_{2}(Education_i) + 
-  \beta_{3}Age_{i} + \beta_{4}Age_{i}^{2} +
-  \beta_{5}Age_{i}^{3} + \epsilon_i
-$$
+For the `number of knots` we will use, or the `degree of freedom`, we can use 
+the technic called `K-Fold Cross Validation` to determine the number of knot.
 
-There is a major point that we have to be careful when using polynomial 
-regression models. The more polynomial terms we added into the model, the more 
-accuracy we will get. However, a higher chance that the model will cause the 
-`overfitting` situation fits the training data nicely but poorly predicts the 
-unseen data (or testing set). 
+The difference between `Basis Spline` and `Natural Spline` is that for each 
+boundary of the natural splines, it will be enforced to be a linear function.
 
-The rule of thumb about how many polynomial term should be applied points out 
-in the [`An introduction to statistical learning : with applications in R`.](http://faculty.marshall.usc.edu/gareth-james/ISL/) Below is a quote from 
-the book.
+In this tutorial, we will use the cubic basis spline and cubic natural spline.
+To determine the degree of freedom (df), we will use `K-fold Cross Validation` 
+when K is equal to 5. Below is the df for each type of cubic spline.
 
-> "Generally speaking, it is unusual to use d (the number of polynomial terms) 
-greater than 3 or 4 because for large values of d, the polynomial curve can 
-become overly flexible and can take on some very strange shapes."
-
-### Basis Spline
-
-### Natural Spline
+  - Basis Spline: df = 4 + knots
+  - Natural Spline: df = 2 + knots
 
 ## Core Analysis {.tabset .tabset-fade .tabset-pills}
 ### Python
@@ -614,14 +632,10 @@ According to the table 3.7, the model is $Wage = -2492.40 +
 9.20I_{64.5 < Age \leq 80.1} + 15.76(Edu) + 1.27(Year)$ where I is an indicator
 function. The corresponding $R^2$ is 0.2766.
 
-#### Basis Spline and Natural Spline
-For both `Basis Spline` and `Natural Spline`, the number of knots or the degree
-of freedom need to be specified. One of the method used for specified is 
-performing `K-fold Cross Validation`. In this case, K is equal to 5. For both 
-types of spline, the highest degree of polynomial for age is 3.
-
-  - Basis Spline: df = 4 + knots
-  - Natural Spline: df = 2 + knots
+#### Basis Spline
+In R, we will use bs() for the basis spline. Also, we have to specify the 
+number of knot or the degree of freedom. In this tutorial, we will determine 
+the degree of freedom instead of the number of knot. 
 
 ```{r k_fold_cv, include = FALSE}
 set.seed(1)
@@ -635,8 +649,9 @@ cap_R8 <- "Figure 3.8 The MSE of the basis spline from performing
 5-fold cross validation"
 ```
 
-The MSE is lowest when the number of `knot` is equal to 1. Fit the regression 
-with basis spline.
+Figure 3.8 shows that the MSE is the lowest when the degree of freedom is equal
+to 6. Then, we will fit the regression witht the basis spline with degree of 
+freedom equal to 6.
 
 ```{r basis_reg, eval = FALSE}
 model_basis <- lm(wage ~ bs(age, df = 6) + edu + year, data = data)
@@ -659,16 +674,20 @@ cap_R10 <- "Figure 3.10 Scatter plot between Wage and Age with Regression line.
 (Basis Spline)"
 ```
 
+#### Natural Spline
+Similar to the basis spline, we will use ns() in R. Also, we have to specify 
+the number of knot or the degree of freedom.  In this tutorial, we will 
+determine the degree of freedom instead of the number of knot. 
 
-Then consider the Natural Spline.
 ```{r, echo = FALSE, fig.cap = cap_R11}
 plot_kfold(bs = FALSE)
 cap_R11 <- "Figure 3.11 The MSE of the natural spline from performing 
 5-fold cross validation"
 ```
 
-The MSE is lowest when the number of `knot` is equal to 4. Fit the regression 
-with natural spline.
+Figure 3.11 shows that the MSE is the lowest when the degree of freedom is 
+equal to 6. Then, we will fit the regression witht the natural spline with 
+degree of freedom equal to 6.
 
 ```{r nat_reg, eval = FALSE}
 model_natural <- lm(wage ~ ns(age, df = 6) + edu + year, data = data)
