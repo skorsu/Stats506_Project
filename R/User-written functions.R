@@ -25,17 +25,19 @@ wage_age <- function(line = FALSE, poly = 1, formula_wage_age = y ~ x){
 }
 
 ## Second Function: Function for performing k-fold cross validation.
-plot_kfold <- function(knots = 1:10, bs = TRUE){
+plot_kfold <- function(df = 1:10, bs = TRUE){
   store_MSE <- c()
   title_plot <- "5-fold cross-validate MSE"
   
   if(bs == TRUE){
     title_plot <- paste0(title_plot, ": Basis Spline")
+    df <- df + 4
   } else  {
     title_plot <- paste0(title_plot, ": Natural Spline")
+    df <- df + 2
   }
   
-  for(i in knots){
+  for(i in df){
     
     MSE <- c()
     
@@ -47,10 +49,10 @@ plot_kfold <- function(knots = 1:10, bs = TRUE){
       
       ## Train the model
       if(bs == TRUE){
-        model <- lm(wage ~ bs(age, df = 4 + i) + edu + year, 
+        model <- lm(wage ~ bs(age, df = i) + edu + year, 
                     data = train_data)
       } else {
-        model <- lm(wage ~ ns(age, df = 2 + i) + edu + year, 
+        model <- lm(wage ~ ns(age, df = i) + edu + year, 
                     data = train_data)
       }
       
@@ -63,13 +65,13 @@ plot_kfold <- function(knots = 1:10, bs = TRUE){
     ## Store the MSE for each knots
     store_MSE <- c(store_MSE, mean(MSE))
   }
-  
+
   ## Create a plot
-  dummy_result <- data.frame(knots = as.factor(knots), store_MSE)
-  p <- ggplot(dummy_result, aes(x = knots, y = store_MSE, group = 1)) +
+  dummy_result <- data.frame(df = as.factor(df), store_MSE)
+  p <- ggplot(dummy_result, aes(x = df, y = store_MSE, group = 1)) +
     geom_line() +
     geom_point() +
-    labs(title = title_plot, x = "Number of knot", y = "MSE") +
+    labs(title = title_plot, x = "Degree of Freedom", y = "MSE") +
     geom_text(aes(label = round(store_MSE,2)), vjust = -1) +
     ylim(min(store_MSE) - 3, max(store_MSE) + 3) +
     theme_bw()
