@@ -527,9 +527,9 @@ cap_Stata5 <- "Figure 2.5 Regression with Cubic polynomial for Age"
   
 The cubic fit plot appears below by simply fitting age against wage.
 
-```{r, echo = FALSE, fig.cap = cap_Stata5}
+```{r, echo = FALSE, fig.cap = cap_Stata6}
 include_graphics2(paste0(main_url, "Stata/Stata_images/cubic_polynom.jpg"))
-cap_Stata5 <- "Figure 2.5 Cubic polynomial Regression for Age"
+cap_Stata6 <- "Figure 2.6 Cubic polynomial Regression for Age"
 ```  
   
 
@@ -548,7 +548,7 @@ mkspline xage1 28.33 xage2 38.66 xage3 48.99 xage4 59.33 ///
 
 ```
 
-If the code was writte `mkspline xage1 28.33 xage2 = age` then `xage1` would be the values below 28.33 and `xage2 ` would be all values above 28.33. 
+If the code was written `mkspline xage1 28.33 xage2 = age` then `xage1` would be the values below 28.33 and `xage2 ` would be all values above 28.33. 
 
 Using these variables we can then compute a step-wise regression. 
 
@@ -557,18 +557,18 @@ regress wage xage1 xage2 xage3 xage4 xage5 xage6 ///
 	year educ 
 ```
 
-```{r, echo = FALSE, fig.cap = cap_Stata6}
+```{r, echo = FALSE, fig.cap = cap_Stata7}
 include_graphics2(paste0(main_url, "Stata/Stata_images/step_reg.png"))
-cap_Stata6 <- " Figure 2.6 Step-wise regression for Age with 6 bins"
+cap_Stata7 <- " Figure 2.7 Step-wise regression for Age with 6 bins"
 ```  
 
 After running the regression we can then use the predicted yhats to graph the
 results.
 
 This figure is not as visually good as those in other programs, but you can see the 'steps' for each bin of age that `Stata` is executing.
-```{r, echo = FALSE, fig.cap = cap_Stata7}
+```{r, echo = FALSE, fig.cap = cap_Stata8}
 include_graphics2(paste0(main_url, "Stata/Stata_images/Step_function2.jpg"))
-cap_Stata7 <- "Figure 2.7 Step-wise regression for Age with 6 bins"
+cap_Stata8 <- "Figure 2.8 Step-wise regression for Age with 6 bins"
 ```  
 
 #### Basis Spline
@@ -580,9 +580,9 @@ bspline, xvar(age) knots(18 35 50 65 80) p(3) gen(_agespt)
 regress wage _agespt* year educ
 ```
 
-```{r, echo = FALSE, fig.cap = cap_Stata8}
+```{r, echo = FALSE, fig.cap = cap_Stata9}
 include_graphics2(paste0(main_url, "Stata/Stata_images/basis_spline_reg.png"))
-cap_Stata8 <- "Figure 2.8 Basis Spline Regression"
+cap_Stata9 <- "Figure 2.9 Basis Spline Regression"
 ```  
 
 To look at the fit for age, we can examine the two-way scatter plot between 
@@ -605,16 +605,16 @@ regress wage age_nc* educ year
 
 The regression output as it appears in `Stata` is below. 
 
-```{r, echo = FALSE, fig.cap = cap_Stata8}
+```{r, echo = FALSE, fig.cap = cap_Stata10}
 include_graphics2(paste0(main_url, "Stata/Stata_images/reg_nat_spline.png"))
-cap_Stata8 <- "Figure 2.9 Natural Spline Regression"
+cap_Stata10 <- "Figure 2.10 Natural Spline Regression"
 ``` 
 
 
 Again for the figure we map `wage` against the `age` splines and use the residuals to create the below plot for the natural spline. 
-```{r, echo = FALSE, fig.cap = cap_Stata9}
+```{r, echo = FALSE, fig.cap = cap_Stata11}
 include_graphics2(paste0(main_url, "Stata/Stata_images/nat_spline.jpg"))
-cap_Stata9 <- "Figure 2.9 Natural Spline for Age "
+cap_Stata11 <- "Figure 2.11 Natural Spline for Age "
 ```  
 
 
@@ -771,6 +771,9 @@ $Wage_{i} = -2330.05 + 369.89(Age_{i}) - 383.49(Age_{i})^{2} +
 80.58(Age_{i})^{3} + 15.30(Edu_{i}) + 1.19(Year_{i})$. 
 
 #### Piecewise Step Function Regression
+
+In order to use the Piecewise Step Function Regression, the function `cut()` 
+need to be applied on the variable that you want to apply the step function on it. The `cut()` function required you to determine the number of cut.
 ```{r step_reg, eval = FALSE}
 model_cut <- lm(wage ~ cut(age, 6) + edu + year, data = data)
 summary(model_cut)
