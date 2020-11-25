@@ -617,6 +617,7 @@ include_graphics2(paste0(main_url, "Stata/Stata_images/nat_spline.jpg"))
 cap_Stata11 <- "Figure 2.11 Natural Spline for Age "
 ```  
 
+While `Stata` may not produce visuals that are as appealing as the other programs, it does provide a simple way to fit models that are non-linear in a variety of ways. 
 
 
 ### R
