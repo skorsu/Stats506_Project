@@ -27,7 +27,7 @@ library(linguisticsdown) ## Import Picture form GitHub site.
 ## Erin: "/Users/erincikanek/GitHub/"
 ## Kevin: "/Users/kevin/506FA20/"
 ## Kyle: "~/STATS506/"
-path <- "/Users/erincikanek/GitHub/"
+path <- "~/STATS506/"
 main_url <- "https://raw.githubusercontent.com/skorsu/Stats506_Project/main/"
 ```
 
@@ -36,7 +36,7 @@ Linear regression has become widely known as a backbone of modern statistics.
 Even as more complex, "black box"-style machine learning techniques increase in
 popularity, many statisticians and researchers still fall back on regression 
 for its interpretability and simpleness. However, linear regression relies on a
-number on assumptions that may not always be true in practice, such as the 
+number of assumptions that may not always be true in practice, such as the 
 constant, monotonic linearity of predictor variables in relation to the 
 response. In this guide, we explore the use of splines to help model predictor 
 variables that may have changing relationships across their domain. These 
@@ -51,10 +51,10 @@ This data is also used in the book [Introduction to Statistical Learning](http:/
 contains wages from 3,000 Mid-Atlantic, male workers, between the years 
 2003-2009, along with a select number of other personal demographics. We retain
 the variables for `wage`, `age`, `year`, and `education` for our analysis. Our 
-goal is to examine the relationship between age, year, and education and 
+goal is to examine the relationship between age, year, and education with 
 workers' yearly wage. 
 
-Below is a table and plots explaining the variables used in this example.
+Below is a table and a series of plots explaining the variables used in this example.
 
 ### Data Structure
 | Variables | Role | Type | Explanation |
@@ -75,8 +75,8 @@ analysis"
 ```
 
 ## Method
-We will first calculate a simple linear regression as a baseline. We will then 
-implement four different spline-like techniques on the "age" predictor 
+In this guide, we will first calculate a simple linear regression as a baseline. We
+will then implement four different spline-like techniques on the "age" predictor 
 variable: a step function, polynomial regression, and two versions of regression splines - 
 basis splines and natural splines. 
 
@@ -87,9 +87,9 @@ learned.
 ### Polynomial Regression
 
 Polynomial regression is a simple method to move beyond the `linearity` from 
-the Linear Regression. This method extends the linearity property of the linear
-regression by adding extra terms of the particular predictor. The terms added
-in the model are obtained by raising the power of the original predictor.
+ordinary linear regression. This method extends the linearity property of the linear
+regression by adding extra terms of a predictor variable. The terms added
+in the model are obtained by raising the power of the original values
 
 This tutorial will extend the linearity by adding the polynomial terms of 
 `Age`. Below is the model used in this tutorial.
@@ -116,7 +116,7 @@ This generates (K-1) coefficients for fitting the K-Step function.
 
 However, there is no standard rule about where to place the knots or how many 
 knots we should include in the analysis. If the natural breakpoints exist, the 
-number of knots and their locations should follow the natural breakpoint. 
+number of knots and their locations should follow the natural breakpoints. 
 
 In this example, the step function will be applied to the `Age` variable. 
 which will be divided into six bins. Below is the regression model 
@@ -130,8 +130,8 @@ Wage_i = \beta_{0} + \beta_{1}(Year_i) + \beta_{2}(Education_i) +
 $$
 
 Where $I_{(a,b]}$ is a indicator function of age where this function will equal
-to 1 if the `Age` of that observation satisfies $a < Age \leq b$, and this 
-function will equal to 0 if oterwise.
+1 if the `Age` of that observation satisfies $a < Age \leq b$, and this 
+function will equal 0 otherwise.
 
 ### Regression Splines
 One major problem of the `Polynomial Regression` is that it requires a high 
@@ -225,7 +225,9 @@ data = data[['wage', 'age', 'education', 'year']]
 
 To start with, let's see what a basic linear regression would give us. From Figure 1.3,
 we can immediately tell that the residuals of our age variable may not be normally 
-distributed. This could result in a poor fit. 
+distributed. Looking closer at Figure 1.4, it appears there is a change in relationship
+specifically near the upper range of the domain of age. This could result in a poor fit. 
+We can see the results of this initial fit in Figure 1.2. 
 ```{r, eval = FALSE}
 model = sm.OLS(data['wage'], sm.add_constant(data.drop('wage',axis=1))).fit()
 model.summary()
@@ -269,6 +271,8 @@ include_graphics2(paste0(main_url, "Python/images/kde_lr.png"))
 cap_Python4 <- "Figure 1.4 KDE Plot"
 ```  
 
+Let's look at the linear relationship between age and wage a bit closer here. It
+is clear that a simple line may be missing some of the variance. 
 ```{r, eval = FALSE}
 fig, ax = plt.subplots(figsize=(7.5,7.5))
 sns.regplot(data['age'],data['wage'])
@@ -282,8 +286,7 @@ include_graphics2(paste0(main_url, "Python/images/age_v_wage_lr.png"))
 cap_Python5 <- "Figure 1.5 Age v. Wage (Linear Reg.)"
 ``` 
 
-Maybe a cubic polynomial would be better? Looking at the model, we immediately see 
-an improvement. 
+Maybe a cubic polynomial would be better? Let's see!  
 ```{r, eval = FALSE}
 plt.figure(figsize=(7.5,7.5))
 p = np.poly1d(np.polyfit(data["age"], data["wage"], 3))
@@ -302,6 +305,9 @@ include_graphics2(paste0(main_url, "Python/images/age_v_wage_cubic.png"))
 cap_Python6 <- "Figure 1.6 Age v. Wage (Cubic Polynomial)"
 ``` 
 
+Looking at the model in Figure 1.7, we can see an improvement as compared 
+to our original model. A cubic transformation on age appears to have had an 
+effect!
 ```{r, eval = FALSE}
 #Building model with a cubic polynomial from pandas df
 cubic_model = sm.OLS(data["wage"], sm.add_constant(np.column_stack(
@@ -327,7 +333,9 @@ include_graphics2(paste0(main_url, "Python/images/cubic_model_summary.png"))
 cap_Python7 <- "Figure 1.7 Cubic Model Summary"
 ``` 
 
-Next, we try stepwise regression. Again, we see improvement from the linear model. 
+Next, we try piecewise regression. Again, we see improvement from the linear model.
+However, it may not have been as successful as the cubic method. Looking at Figure 
+1.8, we can see that not all of the cuts may have been particularly meaningful. 
 ```{r, eval = FALSE}
 data['age_cut'] = pd.cut(data.age, bins=6, labels=False)
 data = data.merge(pd.get_dummies(data['age_cut']).add_prefix('age_cut_'), 
@@ -339,13 +347,13 @@ plt.figure(figsize=(7.5,7.5))
 data.plot.scatter(x='age', y='wage', c='age_cut', colorbar=False)
 plt.ylabel('Wage')
 plt.xlabel('Age')
-plt.title('Age v. Wage (stepwise)')
+plt.title('Age v. Wage (piecewise)')
 plt.savefig('images/age_v_wage_stepwise.png')
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python8}
 include_graphics2(paste0(main_url, "Python/images/age_v_wage_stepwise.png"))
-cap_Python8 <- "Figure 1.8 Age v. Wage (Stepwise)"
+cap_Python8 <- "Figure 1.8 Age v. Wage (Piecewise)"
 ``` 
 
 ```{r, eval = FALSE}
@@ -365,10 +373,18 @@ plt.savefig('images/stepwise_model_summary.png')
 
 ```{r, echo = FALSE, fig.cap = cap_Python9}
 include_graphics2(paste0(main_url, "Python/images/stepwise_model_summary.png"))
-cap_Python9 <- "Figure 1.9 Stepwise Model Summary"
+cap_Python9 <- "Figure 1.9 Piecewise Model Summary"
 ``` 
 
-Finally, we move on to splines. 
+Finally, we move on to splines. In the R version of the how-to, we show an implementation
+of a K-step crossfold validation method to pick the number of knots. While this is not impossible
+in python, there is not a pre-built implementation like we see in R. For the sake of ease for this 
+python how-to, we will skip a custom implementation and leave it as an exploration for the reader. We
+use the R crossfold results in picking our python models. 
+
+Moving on, we first look at the basis spline. We can see in Figure 1.10 that this method looks 
+very similar to the cubic polynomial, and not surprisingly, in Figure 1.11, we see extremely 
+similar performance. 
 ```{r, eval = FALSE}
 y_a,X_a = dmatrices('wage ~ bs(age, df=6)', data)
 age_basis_model = sm.OLS(y_a,X_a).fit()
@@ -407,6 +423,8 @@ include_graphics2(paste0(main_url, "Python/images/basis_model_summary.png"))
 cap_Python11 <- "Figure 1.11 Basis Model Summary"
 ``` 
 
+Our natural spline also looks extremely similar to our basis spline. Again, we see 
+a bump in performance equal to that of the cubic polynomial and basis spline methods. 
 ```{r, eval = FALSE}
 y_na,X_na = dmatrices('wage ~ cr(age, df=6)', data)
 age_natural_model = sm.OLS(y_na,X_na).fit()
@@ -590,13 +608,7 @@ This further extension is still being coded. Please see the README.md file.
 ```{r, echo = FALSE, fig.cap = cap_Stata8}
 include_graphics2(paste0(main_url, "Stata/Stata_images/reg_nat_spline.png"))
 cap_Stata8 <- "Figure 2.9 Natural Spline Regression"
-```  
-
-
-
-
-
-
+``` 
 
 ### R
 Here is the required `libraries` for this tutorial.
@@ -864,6 +876,21 @@ Table 4.1 The coefficient of determination ($R^2$) for each model from Python,
 STATA and R.
 
 ## Discussion
+Looking at Table 4.1, it's hard to miss the noticable gains in improvement in all 
+of the methods when compared back to the original linear regression. We first see 
+a jump in performance when modelling age with a step function, and then again when 
+moving to a cubic method, both with and without splines. This is an important finding
+for those interested in practical applications of regression modelling. 
+
+While it is simple to set up a basic regression model and plug your data in to it, it can be 
+more fruitful to spend some time diving into all potential predictor variables. Often 
+times, in practice, we do not see a linear relationship that is an assumption in
+ordinary least squares. Some researchers attempt to solve this by switching to newer machine
+learning techniques. This is often succesful, however, these algorithms are often much less
+interpretable than regressions, tagged with the nickname "black-box". Using polynomial splines 
+in combination with regression can be a useful strategy to increase your predictive power while
+leaving intact the interpretability that comes with regression. 
+
 ## Reference
 - Gareth James, Daniela Witten, Trevor Hastie, Robert Tibshirani. (2013). 
 [An introduction to statistical learning : with applications in R](http://faculty.marshall.usc.edu/gareth-james/ISL/). New York :Springer,
