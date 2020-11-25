@@ -553,8 +553,8 @@ If the code was writte `mkspline xage1 28.33 xage2 = age` then `xage1` would be 
 Using these variables we can then compute a step-wise regression. 
 
 ```{r, eval = FALSE}
-regress wage  ///
-  year educ
+regress wage xage1 xage2 xage3 xage4 xage5 xage6 ///
+	year educ 
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Stata6}
@@ -562,38 +562,22 @@ include_graphics2(paste0(main_url, "Stata/Stata_images/step_reg.png"))
 cap_Stata6 <- " Figure 2.6 Step-wise regression for Age with 6 bins"
 ```  
 
-After running the regression we can then use the predicted yhats to graph the 
-results: 
-```{r, eval = FALSE}
-predict yhat
-twoway (scatter wage age, sort) ///
-  (line yhat age if age <28.33, sort) ///
-  (line yhat age if age >=28.33 & age < 38.66, sort) ///
-  (line yhat age if age >=38.66 & age < 48.99, sort) ///
-  (line yhat age if age >=48.99 & age<59.33, sort) ///
-  (line yhat age if age >=59.33 & age<69.66, sort) ///
-  (line yhat age if age >=69.66, sort), xline(28.33 38.66 48.99 59.33 69.66) // this looks awful
-```
+After running the regression we can then use the predicted yhats to graph the
+results.
 
+This figure is not as visually good as those in other programs, but you can see the 'steps' for each bin of age that `Stata` is executing.
 ```{r, echo = FALSE, fig.cap = cap_Stata7}
 include_graphics2(paste0(main_url, "Stata/Stata_images/Step_function2.jpg"))
 cap_Stata7 <- "Figure 2.7 Step-wise regression for Age with 6 bins"
 ```  
 
 #### Basis Spline
-For the basis spline, we use the command `bspline`, created by Roger Newson and
-suggested by [Germán Rodríguez at Princeton](https://data.princeton.edu/eco572/smoothing2).
-To create the spline, we call `bspline`, setting the x variable to age and then
-identifying where we would like the knots in the function. For this example I 
-use 3 knots at 35, 50 and 65, however it should be noted that the min and max 
-of the values need to be included in the knots parentheses. I also use a cubic 
-spline, incidated by `p(3)`. The last step in the line of code is the code that
-generates the splines for inclusions in the regression. Then the regression can
-be written as below.    
+For the basis spline, we use the command `bspline`, created by Roger Newson and suggested by [Germán Rodríguez at Princeton](https://data.princeton.edu/eco572/smoothing2).
+To create the spline, we call `bspline`, setting the x variable to age and then identifying where we would like the knots in the function. For this example I use 3 knots at 35, 50 and 65, however it should be noted that the min and max of the values need to be included in the knots parentheses. I also use a cubic spline, incidated by `p(3)`. The last step in the line of code is the code that generates the splines for inclusions in the regression. Then the regression can be written as below.    
 
 ```{r, eval = FALSE}
 bspline, xvar(age) knots(18 35 50 65 80) p(3) gen(_agespt)
-regress wage _agespt* year educ, noconstant
+regress wage _agespt* year educ
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Stata8}
@@ -603,15 +587,8 @@ cap_Stata8 <- "Figure 2.8 Basis Spline Regression"
 
 To look at the fit for age, we can examine the two-way scatter plot between 
 `wage` and `age` using the predicted values of the bivariate regression with 
-splines.
+basis splines. We can see the smoothing of the fit compared to the previous examples. 
 
-```{r, eval = FALSE}
-regress wage _agespt*, noconstant
-predict agespt
-*(option xb assumed; fitted values)
-twoway (scatter wage age)(line agespt age, sort), legend(off)  ///
-  title(Basis Spline for Age)
-```
 
 ```{r, echo = FALSE, fig.cap = cap_Stata9}
 include_graphics2(paste0(main_url, "Stata/Stata_images/basis_spline.jpg"))
@@ -619,11 +596,22 @@ cap_Stata9 <- "Figure 2.9 Step-wise regression for Age with 6 bins"
 ```  
 
 #### Natural Spline
+When working with a function that might be non-linear, a natural spline may also be a good fit beacuse of its constant smooth function. Again, `mkspline` can be used to create the natural spline. Here we specify the new name of the spline variabels `age_nc=age` and that we want a cubic/natrual spline with knots at 18, 35, 50, 65, and 80. 
+
+```{r, eval = FALSE}
+mkspline age_nc=age, cubic knots(18 35 50 65 80)
+regress wage age_nc* educ year
+```
+
+The regression output as it appears in `Stata` is below. 
+
 ```{r, echo = FALSE, fig.cap = cap_Stata8}
 include_graphics2(paste0(main_url, "Stata/Stata_images/reg_nat_spline.png"))
 cap_Stata8 <- "Figure 2.9 Natural Spline Regression"
 ``` 
 
+
+Again for the figure we map `wage` against the `age` splines and use the residuals to create the below plot for the natural spline. 
 ```{r, echo = FALSE, fig.cap = cap_Stata9}
 include_graphics2(paste0(main_url, "Stata/Stata_images/nat_spline.jpg"))
 cap_Stata9 <- "Figure 2.9 Natural Spline for Age "
