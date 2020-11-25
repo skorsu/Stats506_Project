@@ -525,17 +525,30 @@ include_graphics2(paste0(main_url, "Stata/Stata_images/cubic_polynom.png"))
 cap_Stata5 <- "Figure 2.5 Regression with Cubic polynomial for Age"
 ```  
   
+The cubic fit plot appears below by simply fitting age against wage.
+
+```{r, echo = FALSE, fig.cap = cap_Stata5}
+include_graphics2(paste0(main_url, "Stata/Stata_images/cubic_polynom.jpg"))
+cap_Stata5 <- "Figure 2.5 Cubic polynomial Regression for Age"
+```  
+  
+
+
 
 #### Piecewise Step Function Regression
 
 For the piecewise step function, the `mkpline` command offers an easy way to 
 create steps based on user-determined cut-points. Based on analysis in `R` we 
 determined that including 6 groups with 5 cutpoints is best. The below code 
-shows how to generate six age categories. 
+shows how to generate six age categories. The numeric values indicate the cut-points for the function. 
 
 ```{r, eval = FALSE}
+mkspline xage1 28.33 xage2 38.66 xage3 48.99 xage4 59.33 ///
+	xage5 69.66 xage6 = age
 
 ```
+
+If the code was writte `mkspline xage1 28.33 xage2 = age` then `xage1` would be the values below 28.33 and `xage2 ` would be all values above 28.33. 
 
 Using these variables we can then compute a step-wise regression. 
 
