@@ -27,7 +27,7 @@ library(linguisticsdown) ## Import Picture form GitHub site.
 ## Erin: "/Users/erincikanek/GitHub/"
 ## Kevin: "/Users/kevin/506FA20/"
 ## Kyle: "~/STATS506/"
-path <- "~/STATS506/"
+path <- "/Users/erincikanek/GitHub/"
 main_url <- "https://raw.githubusercontent.com/skorsu/Stats506_Project/main/"
 ```
 
@@ -240,7 +240,6 @@ plt.text(0.01, 0.05, str(model.summary()),
 plt.axis('off')
 plt.tight_layout()
 plt.savefig('images/linear_model_summary.png')
-plt.close()
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python2}
@@ -254,7 +253,6 @@ fig.set_size_inches(7.5, 7.5)
 plt.title('QQ Plot (Normal Distribution)')
 plt.show()
 plt.savefig("images/qqplot_lr.png")
-plt.close()
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python3}
@@ -266,7 +264,6 @@ cap_Python3 <- "Figure 1.3 QQ Plot"
 pd.Series(model.resid).plot.kde(figsize=(7.5,7.5))
 plt.title('Kernal Density Estimate')
 plt.savefig("images/kde_lr.png")
-plt.close()
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python4}
@@ -282,7 +279,6 @@ sns.regplot(data['age'],data['wage'])
 plt.title('Age v. Wage (Linear Reg.)')
 plt.xlim([17,81])
 plt.savefig('images/age_v_wage_lr.png')
-plt.close()
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python5}
@@ -301,7 +297,7 @@ plt.xlabel('Age')
 plt.title('Age v. Wage (Cubic Polynomial)')
 plt.show()
 plt.savefig('images/age_v_wage_cubic.png')
-plt.close()
+
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python6}
@@ -330,7 +326,6 @@ plt.text(0.01, 0.05, str(cubic_model.summary(xname=['const','age*1', 'age*2', 'a
 plt.axis('off')
 plt.tight_layout()
 plt.savefig('images/cubic_model_summary.png')
-plt.close()
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python7}
@@ -354,7 +349,6 @@ plt.ylabel('Wage')
 plt.xlabel('Age')
 plt.title('Age v. Wage (piecewise)')
 plt.savefig('images/age_v_wage_stepwise.png')
-plt.close()
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python8}
@@ -375,7 +369,6 @@ plt.text(0.01, 0.05, str(stepwise_model.summary()),
 plt.axis('off')
 plt.tight_layout()
 plt.savefig('images/stepwise_model_summary.png')
-plt.close()
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python9}
@@ -403,7 +396,6 @@ plt.xlabel('Age')
 plt.title('Age v. Wage (Basis Spline)')
 plt.show()
 plt.savefig('images/age_v_wage_basis.png')
-plt.close()
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python10}
@@ -424,7 +416,6 @@ plt.text(0.01, 0.05, str(basis_model.summary()),
 plt.axis('off')
 plt.tight_layout()
 plt.savefig('images/basis_model_summary.png')
-plt.close()
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python11}
@@ -445,7 +436,6 @@ plt.xlabel('Age')
 plt.title('Age v. Wage (Natural Spline)')
 plt.show()
 plt.savefig('images/age_v_wage_natural.png')
-plt.close()
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python12}
@@ -466,7 +456,6 @@ plt.text(0.01, 0.05, str(natural_model.summary()),
 plt.axis('off')
 plt.tight_layout()
 plt.savefig('images/natural_model_summary.png')
-plt.close()
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Python13}
@@ -565,7 +554,7 @@ Using these variables we can then compute a step-wise regression.
 
 ```{r, eval = FALSE}
 regress wage  ///
-  year educ, hascons
+  year educ
 ```
 
 ```{r, echo = FALSE, fig.cap = cap_Stata6}
